@@ -1,0 +1,76 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none"
+     xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <linearGradient id="bg" x1="8" y1="8" x2="56" y2="56">
+      <stop offset="0" stop-color="#7548FF"/>
+      <stop offset="1" stop-color="#3515B8"/>
+    </linearGradient>
+
+    <linearGradient id="check" x1="20" y1="19" x2="45" y2="46">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E8E2FF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded app icon -->
+  <rect
+    x="3"
+    y="3"
+    width="58"
+    height="58"
+    rx="17"
+    fill="url(#bg)"
+  />
+
+  <!-- Inner glow -->
+  <circle
+    cx="32"
+    cy="32"
+    r="21"
+    fill="white"
+    fill-opacity="0.08"
+  />
+
+  <!-- Shield -->
+  <path
+    d="M32 15
+       L47 21
+       V32
+       C47 42 40.5 49 32 53
+       C23.5 49 17 42 17 32
+       V21
+       L32 15Z"
+    fill="white"
+    fill-opacity="0.12"
+    stroke="white"
+    stroke-opacity="0.35"
+    stroke-width="1.5"
+  />
+
+  <!-- Check -->
+  <path
+    d="M23 32.5
+       L29 38.5
+       L42 25"
+    stroke="url(#check)"
+    stroke-width="5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Small AI sparkle -->
+  <path
+    d="M45 13
+       L46.5 17
+       L50 18.5
+       L46.5 20
+       L45 24
+       L43.5 20
+       L40 18.5
+       L43.5 17
+       Z"
+    fill="white"
+  />
+
+</svg>

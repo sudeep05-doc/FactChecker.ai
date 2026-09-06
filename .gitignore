@@ -1,0 +1,14 @@
+# Dependencies and generated builds
+node_modules/
+dist/
+dist-ssr/
+coverage/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+
+# Logs and operating-system files
+*.log
+.DS_Store

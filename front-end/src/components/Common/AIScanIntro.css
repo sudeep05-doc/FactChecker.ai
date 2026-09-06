@@ -1,0 +1,1471 @@
+/* =========================================================
+   FACTCHECKER AI INTRO
+   TOTAL DURATION: 2.4 SECONDS
+========================================================= */
+
+.ai-intro {
+  position: fixed;
+  inset: 0;
+
+  z-index: 999999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(55, 120, 255, 0.14),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(0, 200, 255, 0.08),
+      transparent 30%
+    ),
+    #050914;
+
+  color: #ffffff;
+
+  font-family:
+    Inter,
+    Outfit,
+    Arial,
+    sans-serif;
+
+  animation:
+    aiIntroAppear
+    0.35s
+    ease
+    both;
+}
+
+/* =========================================================
+   CLOSE
+========================================================= */
+
+.ai-intro--closing {
+  pointer-events: none;
+
+  animation:
+    aiIntroClose
+    0.5s
+    cubic-bezier(
+      0.76,
+      0,
+      0.24,
+      1
+    )
+    forwards;
+}
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.ai-intro__grid {
+  position: absolute;
+  inset: 0;
+
+  opacity: 0.22;
+
+  background-image:
+    linear-gradient(
+      rgba(
+        100,
+        150,
+        255,
+        0.08
+      )
+      1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(
+        100,
+        150,
+        255,
+        0.08
+      )
+      1px,
+      transparent 1px
+    );
+
+  background-size:
+    50px 50px;
+
+  mask-image:
+    radial-gradient(
+      circle at center,
+      black,
+      transparent 75%
+    );
+
+  animation:
+    gridMove
+    5s
+    linear
+    infinite;
+}
+
+/* =========================================================
+   AMBIENT
+========================================================= */
+
+.ai-intro__ambient {
+  position: absolute;
+
+  width: 380px;
+  height: 380px;
+
+  border-radius: 50%;
+
+  filter: blur(75px);
+
+  opacity: 0.28;
+
+  pointer-events: none;
+}
+
+.ai-intro__ambient--one {
+  top: 8%;
+  left: 12%;
+
+  background:
+    rgba(
+      50,
+      110,
+      255,
+      0.35
+    );
+
+  animation:
+    ambientOne
+    5s
+    ease-in-out
+    infinite;
+}
+
+.ai-intro__ambient--two {
+  right: 8%;
+  bottom: 5%;
+
+  background:
+    rgba(
+      0,
+      210,
+      255,
+      0.24
+    );
+
+  animation:
+    ambientTwo
+    5.5s
+    ease-in-out
+    infinite;
+}
+
+/* =========================================================
+   PARTICLES
+========================================================= */
+
+.ai-intro__particles {
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+}
+
+.ai-particle {
+  position: absolute;
+
+  width: 3px;
+  height: 3px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(
+      140,
+      205,
+      255,
+      0.75
+    );
+
+  box-shadow:
+    0 0 10px
+    rgba(
+      80,
+      180,
+      255,
+      0.8
+    );
+
+  animation:
+    particleFloat
+    2.5s
+    ease-in-out
+    infinite;
+}
+
+.ai-particle:nth-child(1) {
+  left: 8%;
+  top: 18%;
+}
+
+.ai-particle:nth-child(2) {
+  left: 15%;
+  top: 72%;
+}
+
+.ai-particle:nth-child(3) {
+  left: 22%;
+  top: 32%;
+}
+
+.ai-particle:nth-child(4) {
+  left: 28%;
+  top: 82%;
+}
+
+.ai-particle:nth-child(5) {
+  left: 35%;
+  top: 17%;
+}
+
+.ai-particle:nth-child(6) {
+  left: 42%;
+  top: 68%;
+}
+
+.ai-particle:nth-child(7) {
+  left: 48%;
+  top: 24%;
+}
+
+.ai-particle:nth-child(8) {
+  left: 55%;
+  top: 78%;
+}
+
+.ai-particle:nth-child(9) {
+  left: 61%;
+  top: 14%;
+}
+
+.ai-particle:nth-child(10) {
+  left: 67%;
+  top: 58%;
+}
+
+.ai-particle:nth-child(11) {
+  left: 73%;
+  top: 28%;
+}
+
+.ai-particle:nth-child(12) {
+  left: 80%;
+  top: 74%;
+}
+
+.ai-particle:nth-child(13) {
+  left: 88%;
+  top: 20%;
+}
+
+.ai-particle:nth-child(14) {
+  left: 92%;
+  top: 62%;
+}
+
+.ai-particle:nth-child(15) {
+  left: 12%;
+  top: 45%;
+}
+
+.ai-particle:nth-child(16) {
+  left: 19%;
+  top: 90%;
+}
+
+.ai-particle:nth-child(17) {
+  left: 31%;
+  top: 48%;
+}
+
+.ai-particle:nth-child(18) {
+  left: 38%;
+  top: 92%;
+}
+
+.ai-particle:nth-child(19) {
+  left: 46%;
+  top: 10%;
+}
+
+.ai-particle:nth-child(20) {
+  left: 53%;
+  top: 52%;
+}
+
+.ai-particle:nth-child(21) {
+  left: 59%;
+  top: 88%;
+}
+
+.ai-particle:nth-child(22) {
+  left: 70%;
+  top: 43%;
+}
+
+.ai-particle:nth-child(23) {
+  left: 76%;
+  top: 91%;
+}
+
+.ai-particle:nth-child(24) {
+  left: 84%;
+  top: 48%;
+}
+
+.ai-particle:nth-child(25) {
+  left: 90%;
+  top: 35%;
+}
+
+.ai-particle:nth-child(26) {
+  left: 25%;
+  top: 12%;
+}
+
+.ai-particle:nth-child(27) {
+  left: 64%;
+  top: 82%;
+}
+
+.ai-particle:nth-child(28) {
+  left: 96%;
+  top: 84%;
+}
+
+.ai-particle:nth-child(odd) {
+  animation-delay: -1s;
+}
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.ai-intro__content {
+  position: relative;
+
+  z-index: 5;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  width:
+    min(
+      90vw,
+      600px
+    );
+
+  text-align: center;
+
+  animation:
+    contentReveal
+    0.45s
+    cubic-bezier(
+      0.22,
+      1,
+      0.36,
+      1
+    )
+    both;
+}
+
+/* =========================================================
+   LOGO
+========================================================= */
+
+.ai-logo-stage {
+  position: relative;
+
+  width: 170px;
+  height: 170px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  margin-bottom: 15px;
+}
+
+.ai-logo-glow {
+  position: absolute;
+
+  width: 115px;
+  height: 115px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(
+        65,
+        155,
+        255,
+        0.4
+      ),
+      transparent 70%
+    );
+
+  filter: blur(12px);
+
+  animation:
+    logoGlow
+    1.4s
+    ease-in-out
+    infinite;
+}
+
+/* =========================================================
+   ORBITS
+========================================================= */
+
+.ai-logo-orbit {
+  position: absolute;
+
+  border-radius: 50%;
+
+  border:
+    1px solid
+    rgba(
+      90,
+      180,
+      255,
+      0.38
+    );
+
+  animation:
+    orbitSpin
+    4.5s
+    linear
+    infinite;
+}
+
+.ai-logo-orbit--outer {
+  width: 165px;
+  height: 165px;
+
+  border-top-color:
+    rgba(
+      100,
+      210,
+      255,
+      0.95
+    );
+
+  border-right-color:
+    transparent;
+}
+
+.ai-logo-orbit--inner {
+  width: 135px;
+  height: 135px;
+
+  border-bottom-color:
+    rgba(
+      70,
+      140,
+      255,
+      0.8
+    );
+
+  border-left-color:
+    transparent;
+
+  animation-direction:
+    reverse;
+
+  animation-duration:
+    3s;
+}
+
+/* =========================================================
+   SHIELD
+========================================================= */
+
+.ai-logo-mark {
+  position: relative;
+
+  z-index: 5;
+
+  width: 92px;
+  height: 106px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  filter:
+    drop-shadow(
+      0 0 18px
+      rgba(
+        55,
+        160,
+        255,
+        0.55
+      )
+    );
+
+  animation:
+    logoMarkReveal
+    0.45s
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    both;
+}
+
+.ai-logo-shield {
+  position: relative;
+
+  width: 78px;
+  height: 92px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(
+        80,
+        170,
+        255,
+        0.95
+      ),
+      rgba(
+        25,
+        75,
+        180,
+        0.95
+      )
+    );
+
+  clip-path:
+    polygon(
+      50% 0%,
+      94% 17%,
+      88% 62%,
+      72% 82%,
+      50% 100%,
+      28% 82%,
+      12% 62%,
+      6% 17%
+    );
+
+  box-shadow:
+    inset 0 0 20px
+    rgba(
+      255,
+      255,
+      255,
+      0.2
+    );
+}
+
+.ai-logo-shield::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 4px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #09152d,
+      #102b58
+    );
+
+  clip-path:
+    polygon(
+      50% 0%,
+      94% 17%,
+      88% 62%,
+      72% 82%,
+      50% 100%,
+      28% 82%,
+      12% 62%,
+      6% 17%
+    );
+}
+
+.ai-logo-check {
+  position: relative;
+
+  z-index: 2;
+
+  font-size: 44px;
+
+  font-weight: 800;
+
+  line-height: 1;
+
+  transform:
+    translateY(-3px);
+
+  text-shadow:
+    0 0 15px
+    rgba(
+      100,
+      200,
+      255,
+      0.85
+    );
+
+  animation:
+    checkReveal
+    0.4s
+    0.1s
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    both;
+}
+
+/* =========================================================
+   SCAN LINE
+========================================================= */
+
+.ai-scan-line {
+  position: absolute;
+
+  z-index: 8;
+
+  left: 26px;
+  right: 26px;
+
+  height: 2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(
+        90,
+        210,
+        255,
+        0.95
+      ),
+      transparent
+    );
+
+  box-shadow:
+    0 0 12px
+    rgba(
+      80,
+      200,
+      255,
+      0.9
+    );
+
+  animation:
+    scanLine
+    0.8s
+    ease-in-out
+    infinite;
+}
+
+/* =========================================================
+   BRAND
+========================================================= */
+
+.ai-brand {
+  animation:
+    brandReveal
+    0.4s
+    0.1s
+    ease
+    both;
+}
+
+.ai-brand-name {
+  display: flex;
+
+  align-items: baseline;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  font-size:
+    clamp(
+      28px,
+      5vw,
+      46px
+    );
+
+  font-weight: 300;
+
+  letter-spacing:
+    0.14em;
+}
+
+.ai-brand-name span {
+  font-weight: 300;
+}
+
+.ai-brand-name strong {
+  font-weight: 800;
+
+  background:
+    linear-gradient(
+      90deg,
+      #ffffff,
+      #74cfff,
+      #ffffff
+    );
+
+  background-size:
+    200% auto;
+
+  -webkit-background-clip:
+    text;
+
+  background-clip:
+    text;
+
+  color: transparent;
+
+  animation:
+    brandShimmer
+    2s
+    linear
+    infinite;
+}
+
+.ai-brand-subtitle {
+  margin-top: 6px;
+
+  font-size: 9px;
+
+  font-weight: 600;
+
+  letter-spacing:
+    0.3em;
+
+  color:
+    rgba(
+      165,
+      205,
+      240,
+      0.68
+    );
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.ai-status {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-top: 23px;
+
+  font-size: 9px;
+
+  font-weight: 700;
+
+  letter-spacing:
+    0.16em;
+
+  color:
+    rgba(
+      170,
+      215,
+      255,
+      0.78
+    );
+
+  animation:
+    statusReveal
+    0.4s
+    0.2s
+    ease
+    both;
+}
+
+.ai-status__dot {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background:
+    #61d8ff;
+
+  box-shadow:
+    0 0 10px
+    rgba(
+      80,
+      210,
+      255,
+      0.95
+    );
+
+  animation:
+    statusPulse
+    0.6s
+    ease-in-out
+    infinite;
+}
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+.ai-progress {
+  width:
+    min(
+      330px,
+      72vw
+    );
+
+  height: 2px;
+
+  margin-top: 12px;
+
+  overflow: hidden;
+
+  background:
+    rgba(
+      120,
+      170,
+      220,
+      0.13
+    );
+
+  border-radius: 20px;
+
+  animation:
+    progressReveal
+    0.4s
+    0.25s
+    ease
+    both;
+}
+
+.ai-progress__bar {
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      #3d8dff,
+      #68dcff
+    );
+
+  box-shadow:
+    0 0 12px
+    rgba(
+      80,
+      190,
+      255,
+      0.8
+    );
+
+  transition:
+    width
+    0.3s
+    ease;
+}
+
+.ai-progress-label {
+  width:
+    min(
+      330px,
+      72vw
+    );
+
+  display: flex;
+
+  justify-content: space-between;
+
+  margin-top: 6px;
+
+  font-size: 7px;
+
+  letter-spacing:
+    0.15em;
+
+  color:
+    rgba(
+      130,
+      170,
+      210,
+      0.5
+    );
+}
+
+/* =========================================================
+   CORNERS
+========================================================= */
+
+.ai-corner {
+  position: absolute;
+
+  width: 54px;
+  height: 54px;
+
+  opacity: 0.5;
+}
+
+.ai-corner span {
+  position: absolute;
+
+  display: block;
+
+  background:
+    rgba(
+      95,
+      185,
+      255,
+      0.7
+    );
+}
+
+.ai-corner--top-left {
+  top: 28px;
+  left: 28px;
+}
+
+.ai-corner--top-left span:first-child {
+  top: 0;
+  left: 0;
+
+  width: 28px;
+  height: 1px;
+}
+
+.ai-corner--top-left span:last-child {
+  top: 0;
+  left: 0;
+
+  width: 1px;
+  height: 28px;
+}
+
+.ai-corner--top-right {
+  top: 28px;
+  right: 28px;
+}
+
+.ai-corner--top-right span:first-child {
+  top: 0;
+  right: 0;
+
+  width: 28px;
+  height: 1px;
+}
+
+.ai-corner--top-right span:last-child {
+  top: 0;
+  right: 0;
+
+  width: 1px;
+  height: 28px;
+}
+
+.ai-corner--bottom-left {
+  bottom: 28px;
+  left: 28px;
+}
+
+.ai-corner--bottom-left span:first-child {
+  bottom: 0;
+  left: 0;
+
+  width: 28px;
+  height: 1px;
+}
+
+.ai-corner--bottom-left span:last-child {
+  bottom: 0;
+  left: 0;
+
+  width: 1px;
+  height: 28px;
+}
+
+.ai-corner--bottom-right {
+  right: 28px;
+  bottom: 28px;
+}
+
+.ai-corner--bottom-right span:first-child {
+  right: 0;
+  bottom: 0;
+
+  width: 28px;
+  height: 1px;
+}
+
+.ai-corner--bottom-right span:last-child {
+  right: 0;
+  bottom: 0;
+
+  width: 1px;
+  height: 28px;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.ai-intro__footer {
+  position: absolute;
+
+  left: 50%;
+  bottom: 24px;
+
+  transform:
+    translateX(-50%);
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  white-space: nowrap;
+
+  font-size: 8px;
+
+  font-weight: 600;
+
+  letter-spacing:
+    0.18em;
+
+  color:
+    rgba(
+      120,
+      165,
+      205,
+      0.42
+    );
+
+  animation:
+    footerReveal
+    0.45s
+    0.25s
+    ease
+    both;
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes aiIntroAppear {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes aiIntroClose {
+  0% {
+    opacity: 1;
+
+    transform:
+      scale(1);
+  }
+
+  100% {
+    opacity: 0;
+
+    transform:
+      scale(1.05);
+
+    filter:
+      blur(7px);
+  }
+}
+
+@keyframes contentReveal {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(14px)
+      scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+@keyframes logoMarkReveal {
+  from {
+    opacity: 0;
+
+    transform:
+      scale(0.4)
+      rotate(-8deg);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      scale(1)
+      rotate(0);
+  }
+}
+
+@keyframes checkReveal {
+  from {
+    opacity: 0;
+
+    transform:
+      scale(0.3)
+      translateY(-3px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      scale(1)
+      translateY(-3px);
+  }
+}
+
+@keyframes orbitSpin {
+  to {
+    transform:
+      rotate(360deg);
+  }
+}
+
+@keyframes logoGlow {
+  0%,
+  100% {
+    opacity: 0.35;
+
+    transform:
+      scale(0.9);
+  }
+
+  50% {
+    opacity: 0.8;
+
+    transform:
+      scale(1.1);
+  }
+}
+
+@keyframes scanLine {
+  0% {
+    top: 30px;
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  85% {
+    opacity: 1;
+  }
+
+  100% {
+    top: 145px;
+    opacity: 0;
+  }
+}
+
+@keyframes brandReveal {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0);
+  }
+}
+
+@keyframes brandShimmer {
+  0% {
+    background-position:
+      200% center;
+  }
+
+  100% {
+    background-position:
+      -200% center;
+  }
+}
+
+@keyframes statusReveal {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0);
+  }
+}
+
+@keyframes statusPulse {
+  0%,
+  100% {
+    opacity: 0.4;
+
+    transform:
+      scale(0.8);
+  }
+
+  50% {
+    opacity: 1;
+
+    transform:
+      scale(1.15);
+  }
+}
+
+@keyframes progressReveal {
+  from {
+    opacity: 0;
+
+    transform:
+      scaleX(0.5);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      scaleX(1);
+  }
+}
+
+@keyframes particleFloat {
+  0%,
+  100% {
+    opacity: 0.2;
+
+    transform:
+      translateY(0)
+      scale(0.7);
+  }
+
+  50% {
+    opacity: 0.9;
+
+    transform:
+      translateY(-14px)
+      scale(1);
+  }
+}
+
+@keyframes gridMove {
+  from {
+    transform:
+      translateY(0);
+  }
+
+  to {
+    transform:
+      translateY(50px);
+  }
+}
+
+@keyframes ambientOne {
+  0%,
+  100% {
+    transform:
+      translate(0, 0)
+      scale(1);
+  }
+
+  50% {
+    transform:
+      translate(35px, 25px)
+      scale(1.1);
+  }
+}
+
+@keyframes ambientTwo {
+  0%,
+  100% {
+    transform:
+      translate(0, 0)
+      scale(1);
+  }
+
+  50% {
+    transform:
+      translate(-30px, -25px)
+      scale(1.1);
+  }
+}
+
+@keyframes footerReveal {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+  .ai-logo-stage {
+    width: 150px;
+    height: 150px;
+  }
+
+  .ai-logo-orbit--outer {
+    width: 145px;
+    height: 145px;
+  }
+
+  .ai-logo-orbit--inner {
+    width: 120px;
+    height: 120px;
+  }
+
+  .ai-logo-mark {
+    transform:
+      scale(0.82);
+  }
+
+  .ai-brand-name {
+    font-size: 27px;
+    gap: 5px;
+  }
+
+  .ai-brand-subtitle {
+    font-size: 7px;
+    letter-spacing:
+      0.2em;
+  }
+
+  .ai-status {
+    margin-top: 20px;
+    font-size: 8px;
+  }
+
+  .ai-progress {
+    width: 260px;
+  }
+
+  .ai-progress-label {
+    width: 260px;
+  }
+
+  .ai-intro__footer {
+    bottom: 15px;
+
+    font-size: 6px;
+
+    gap: 6px;
+  }
+
+  .ai-corner {
+    width: 35px;
+    height: 35px;
+  }
+
+  .ai-corner--top-left,
+  .ai-corner--top-right {
+    top: 18px;
+  }
+
+  .ai-corner--bottom-left,
+  .ai-corner--bottom-right {
+    bottom: 18px;
+  }
+
+  .ai-corner--top-left,
+  .ai-corner--bottom-left {
+    left: 18px;
+  }
+
+  .ai-corner--top-right,
+  .ai-corner--bottom-right {
+    right: 18px;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-intro *,
+  .ai-intro {
+    animation-duration:
+      0.01ms !important;
+
+    animation-iteration-count:
+      1 !important;
+
+    transition-duration:
+      0.01ms !important;
+  }
+}
