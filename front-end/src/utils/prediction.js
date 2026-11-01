@@ -1,176 +1,123 @@
-/* ==========================================
-        AI Fake News Prediction Utility
-========================================== */
+const EVIDENCE_VERDICTS = new Set([
+  "SUPPORTED",
+  "REFUTED",
+  "INSUFFICIENT_EVIDENCE",
+  "CONFLICTING_EVIDENCE",
+  "CHERRY_PICKING",
+]);
 
-const fakeKeywords = [
-  "breaking",
-  "shocking",
-  "viral",
-  "exclusive",
-  "secret",
-  "click here",
-  "100% true",
-  "miracle",
-  "unbelievable",
-  "must watch",
-  "share now",
-  "forward this",
-  "urgent",
-  "government hiding",
-  "leaked",
-  "exposed",
-  "conspiracy",
-  "fake",
-];
-
-const trustedDomains = [
-  "bbc.com",
-  "reuters.com",
-  "apnews.com",
-  "thehindu.com",
-  "indianexpress.com",
-  "ndtv.com",
-  "timesofindia.com",
-  "hindustantimes.com",
-];
-
-/* ==========================================
-        Random Confidence
-========================================== */
-
-const generateConfidence = (
-  isFake
-) => {
-  if (isFake) {
-    return Math.floor(
-      Math.random() * 16
-    ) + 80;
-  }
-
-  return (
-    Math.floor(
-      Math.random() * 11
-    ) + 90
-  );
-};
-
-/* ==========================================
-        URL Checker
-========================================== */
-
-const isTrustedSource = (
-  url
-) => {
-  return trustedDomains.some(
-    (domain) =>
-      url
-        .toLowerCase()
-        .includes(domain)
-  );
-};
-
-/* ==========================================
-        Keyword Score
-========================================== */
-
-const getFakeKeywordScore = (
-  text
-) => {
-  const content =
-    text.toLowerCase();
-
-  let score = 0;
-
-  fakeKeywords.forEach(
-    (word) => {
-      if (
-        content.includes(word)
-      ) {
-        score++;
-      }
-    }
-  );
-
-  return score;
-};
-
-/* ==========================================
-        Prediction
-========================================== */
-
-export const predictNews = ({
-  text = "",
-  url = "",
-}) => {
-  const fakeScore =
-    getFakeKeywordScore(
-      text
-    );
-
-  const trusted =
-    isTrustedSource(url);
-
-  const isFake =
-    fakeScore >= 2 &&
-    !trusted;
-
-  const confidence =
-    generateConfidence(
-      isFake
-    );
+export function createUnavailableVerification({
+  type = "text",
+  content = "",
+  fileName = "",
+} = {}) {
+  const timestamp = new Date().toLocaleString();
 
   return {
-    label: isFake
-      ? "Fake News"
-      : "Real News",
-
-    confidence,
-
-    fakeScore,
-
-    trustedSource:
-      trusted,
-
-    explanation: isFake
-      ? "Suspicious keywords and writing patterns were detected."
-      : "Content appears consistent with trusted reporting patterns.",
-
-    factors: {
-      source: trusted
-        ? 95
-        : 60,
-
-      credibility: isFake
-        ? 42
-        : 91,
-
-      writing: isFake
-        ? 54
-        : 89,
-
-      consistency: isFake
-        ? 47
-        : 93,
-    },
+    id: Date.now(),
+    predictionType: "evidence_verification",
+    datasetPrediction: null,
+    modelIdentity: null,
+    datasetIdentity: null,
+    verdict: null,
+    confidence: null,
+    confidenceSemantics: "not_available",
+    isMock: true,
+    evidenceStatus: "not_implemented",
+    explanationProvenance: "mock_notice",
+    status: "unavailable",
+    label: "Verification unavailable",
+    explanation:
+      "Evidence-based factual verification is not implemented. No verdict or confidence score was produced.",
+    reasoning: [],
+    contentType: type,
+    inputContent: content,
+    fileName,
+    reportId: null,
+    processingTime: null,
+    time: timestamp,
+    method: "mock-unavailable",
+    text: (content || fileName || "Content submitted").slice(0, 120),
   };
-};
+}
 
-/* ==========================================
-        Demo Delay
-========================================== */
-
-export const analyzeWithDelay =
-  (
-    data,
-    delay = 1800
-  ) => {
-    return new Promise(
-      (resolve) => {
-        setTimeout(() => {
-          resolve(
-            predictNews(data)
-          );
-        }, delay);
-      }
+export function getPredictionPresentation(result) {
+  const predictionType =
+    result?.predictionType ?? result?.prediction_type;
+  const evidenceStatus =
+    result?.evidenceStatus ?? result?.evidence_status;
+  const verdict = result?.verdict;
+  const scoreSemantics =
+    result?.confidenceSemantics ?? result?.confidence_semantics;
+  const datasetPrediction =
+    result?.datasetPrediction ?? result?.dataset_prediction;
+  const classScores = result?.classScores ?? result?.class_scores;
+  const datasetScore =
+    result?.datasetScore ??
+    result?.dataset_score ??
+    classScores?.[datasetPrediction];
+  const scoreValue =
+    predictionType === "dataset_classification"
+      ? datasetScore
+      : result?.confidence;
+  const scoreAvailable =
+    Number.isFinite(scoreValue) &&
+    scoreValue >= 0 &&
+    scoreValue <= 1 &&
+    ["calibrated_class_probability", "uncalibrated_dataset_score"].includes(
+      scoreSemantics
     );
+
+  if (
+    predictionType === "dataset_classification"
+  ) {
+    const datasetLabel = datasetPrediction || "unavailable";
+    const datasetName =
+      result.datasetIdentity ||
+      result.dataset_identity ||
+      "Unspecified dataset";
+    return {
+      kind: "dataset_classification",
+      title: `${datasetName} Dataset-Label Prediction`,
+      summary: `${datasetName} label: ${datasetLabel}`,
+      score: scoreAvailable ? scoreValue * 100 : null,
+      scoreLabel: scoreAvailable ? "Dataset-classification score" : null,
+      scoreSemantics: scoreAvailable ? scoreSemantics : "not_available",
+    };
+  }
+
+  if (
+    predictionType === "evidence_verification" &&
+    evidenceStatus === "evaluated" &&
+    EVIDENCE_VERDICTS.has(verdict)
+  ) {
+    return {
+      kind: "evidence_verdict",
+      title: "Evidence-Based Factual Verification",
+      summary: verdict,
+      score: scoreAvailable ? scoreValue * 100 : null,
+      scoreLabel: scoreAvailable ? "Predicted-class probability" : null,
+      scoreSemantics: scoreAvailable ? scoreSemantics : "not_available",
+    };
+  }
+
+  if (predictionType === "evidence_verification") {
+    return {
+      kind: "evidence_unavailable",
+      title: "Factual verification unavailable",
+      summary: "No evidence-based verdict was generated.",
+      score: null,
+      scoreLabel: null,
+      scoreSemantics: "not_available",
+    };
+  }
+
+  return {
+    kind: "legacy_unverified",
+    title: "Legacy unverified prediction",
+    summary: "Prediction semantics are unavailable.",
+    score: null,
+    scoreLabel: null,
+    scoreSemantics: "unknown",
   };
+}

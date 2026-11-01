@@ -3,6 +3,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { createUnavailableVerification } from "../utils/prediction";
 
 export const AppContext =
   createContext();
@@ -52,28 +53,61 @@ export const AppProvider = ({
      =========================== */
 
   useEffect(() => {
-    const profileData =
-      localStorage.getItem(
-        "fc_profile"
-      );
-
-    const historyData =
-      localStorage.getItem(
-        "fc_history"
-      );
-
-    if (profileData) {
-      setProfile(
-        JSON.parse(profileData)
-      );
-    }
+  const loadData = async () => {
+    // Load history
+    const historyData = localStorage.getItem("fc_history");
 
     if (historyData) {
-      setHistory(
-        JSON.parse(historyData)
+      setHistory(JSON.parse(historyData));
+    }
+
+    // Get current login token
+    const token = localStorage.getItem("fc_token");
+
+    // No logged-in account
+    if (!token) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/users/profile",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to load profile."
+        );
+      }
+
+      // This profile belongs to the account
+      // represented by fc_token.
+      const latestProfile = data.data;
+
+      setProfile(latestProfile);
+
+      localStorage.setItem(
+        "fc_profile",
+        JSON.stringify(latestProfile)
+      );
+    } catch (error) {
+      console.error(
+        "Failed to load profile:",
+        error
       );
     }
-  }, []);
+  };
+
+  loadData();
+}, []);
 
   /* ===========================
         Save Storage
@@ -94,7 +128,7 @@ export const AppProvider = ({
   }, [history]);
 
   /* ===========================
-        Fake AI Prediction
+        Verification placeholder
      =========================== */
 
   const analyzeNews = (text) => {
@@ -107,57 +141,20 @@ export const AppProvider = ({
 
     setLoading(true);
 
-    setTimeout(() => {
-      const confidence =
-        Math.floor(
-          Math.random() * 21
-        ) + 80;
+    const prediction = createUnavailableVerification({
+      type: "text",
+      content: text,
+    });
 
-      const fakeWords = [
-        "breaking",
-        "shocking",
-        "viral",
-        "exclusive",
-        "unbelievable",
-        "secret",
-        "click",
-      ];
-
-      const isFake =
-        fakeWords.some((word) =>
-          text
-            .toLowerCase()
-            .includes(word)
-        );
-
-      const prediction = {
-        id: Date.now(),
-
-        text:
-          text.length > 120
-            ? text.substring(0, 120) +
-              "..."
-            : text,
-
-        label: isFake
-          ? "Fake News"
-          : "Real News",
-
-        confidence,
-
-        time:
-          new Date().toLocaleString(),
-      };
-
-      setResult(prediction);
-
-      setHistory((prev) => [
-        prediction,
-        ...prev,
-      ]);
-
-      setLoading(false);
-    }, 1800);
+    setResult(prediction);
+    setHistory((prev) => [
+      {
+        ...prediction,
+        text: prediction.text,
+      },
+      ...prev,
+    ]);
+    setLoading(false);
   };
 
   /* ===========================

@@ -12,3 +12,31 @@ coverage/
 # Logs and operating-system files
 *.log
 .DS_Store
+
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Node.js
+node_modules/
+
+# macOS
+.DS_Store
+
+# Local research datasets
+/research-data/
+
+# Model artifacts
+*.pt
+*.pth
+*.ckpt
+*.safetensors

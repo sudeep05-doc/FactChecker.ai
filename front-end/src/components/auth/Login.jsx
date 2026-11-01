@@ -6,14 +6,51 @@ export default function Login({ onSignup, onForgotPassword }) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  const handleLogin = async (e) => {
+  e.preventDefault();
 
-    console.log("Login:", {
-      email,
-      password,
-    });
-  };
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/auth/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Login failed.");
+    }
+
+    // Save authentication information
+    localStorage.setItem("fc_token", data.data.token);
+
+    localStorage.setItem(
+      "fc_current_user",
+      JSON.stringify(data.data.user)
+    );
+
+    localStorage.setItem(
+      "fc_profile",
+      JSON.stringify(data.data.profile)
+    );
+
+    console.log("Login successful:", data.data.user);
+
+    // We'll connect this to your dashboard navigation next.
+  } catch (err) {
+    console.error("Login error:", err);
+    alert(err.message || "Unable to login.");
+  }
+};
 
   return (
     <AuthLayout>

@@ -1,9 +1,13 @@
 const { body, validationResult } = require("express-validator");
+const crypto = require("crypto");
+
 const User = require("../models/User");
+
 const { hashPassword, comparePassword } = require("../utils/hashPassword");
 const generateToken = require("../utils/generateToken");
 const { success, error } = require("../utils/apiResponse");
 const { seedDefaultNotifications } = require("../services/notificationService");
+const { sendOTPEmail } = require("../services/emailService");
 
 const handleValidation = (req, res) => {
   const errors = validationResult(req);
@@ -70,7 +74,7 @@ const register = async (req, res, next) => {
       email,
       phone,
       password: hashed,
-      role: userCount === 0 ? "admin" : "user",
+      role: "user",
       displayRole: "User",
       year: "Final Year",
     });
@@ -136,6 +140,193 @@ const logout = async (req, res) => {
   return success(res, {}, "Logged out successfully.");
 };
 
+const forgotPassword = async (req, res, next) => {
+  try {
+    const email = req.body.email?.trim().toLowerCase();
+
+    if (!email) {
+      return error(res, "Please enter your email address.", 400);
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return success(
+        res,
+        {},
+        "If an account exists with this email, an OTP has been sent."
+      );
+    }
+    const otp = crypto.randomInt(100000, 1000000).toString();
+    user.resetPasswordOTP = otp;
+    user.resetPasswordOTPExpires = new Date(
+      Date.now() + 10 * 60 * 1000
+    );
+    user.resetPasswordOTPAttempts = 0;
+    await user.save();
+    await sendOTPEmail(user.email, otp);
+    return success(
+      res,
+      {},
+      "If an account exists with this email, an OTP has been sent."
+    );
+  } catch (err) {
+    next(err);
+  }
+};
+const verifyResetOTP = async (req, res, next) => {
+  try {
+    const email = req.body.email?.trim().toLowerCase();
+    const otp = req.body.otp?.trim();
+
+    if (!email || !otp) {
+      return error(res, "Email and OTP are required.", 400);
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return error(res, "Invalid or expired OTP.", 400);
+    }
+
+    if (!user.resetPasswordOTP || !user.resetPasswordOTPExpires) {
+      return error(res, "Invalid or expired OTP.", 400);
+    }
+
+    // Check expiry
+    if (user.resetPasswordOTPExpires < new Date()) {
+      user.resetPasswordOTP = null;
+      user.resetPasswordOTPExpires = null;
+      user.resetPasswordOTPAttempts = 0;
+
+      await user.save();
+
+      return error(
+        res,
+        "OTP has expired. Please request a new one.",
+        400
+      );
+    }
+
+    // Maximum 5 incorrect attempts
+    if (user.resetPasswordOTPAttempts >= 5) {
+      return error(
+        res,
+        "Too many incorrect attempts. Please request a new OTP.",
+        429
+      );
+    }
+
+    // Check OTP
+    if (user.resetPasswordOTP !== otp) {
+      user.resetPasswordOTPAttempts += 1;
+
+      await user.save();
+
+      return error(res, "Invalid OTP.", 400);
+    }
+
+    return success(
+      res,
+      {},
+      "OTP verified successfully."
+    );
+  } catch (err) {
+    next(err);
+  }
+};
+const resetPassword = async (req, res, next) => {
+  try {
+    const email = req.body.email?.trim().toLowerCase();
+    const otp = req.body.otp?.trim();
+    const newPassword = req.body.newPassword;
+
+    if (!email || !otp || !newPassword) {
+      return error(
+        res,
+        "Email, OTP and new password are required.",
+        400
+      );
+    }
+
+    // Same password rules as signup
+    if (newPassword.length < 8) {
+      return error(
+        res,
+        "Password must contain at least 8 characters.",
+        400
+      );
+    }
+
+    if (!/[A-Z]/.test(newPassword)) {
+      return error(
+        res,
+        "Password must contain an uppercase letter.",
+        400
+      );
+    }
+
+    if (!/[0-9]/.test(newPassword)) {
+      return error(
+        res,
+        "Password must contain a number.",
+        400
+      );
+    }
+
+    if (!/[^A-Za-z0-9]/.test(newPassword)) {
+      return error(
+        res,
+        "Password must contain a special character.",
+        400
+      );
+    }
+
+    const user = await User.findOne({ email }).select(
+      "+password"
+    );
+
+    if (!user) {
+      return error(res, "Invalid or expired OTP.", 400);
+    }
+
+    if (!user.resetPasswordOTP || !user.resetPasswordOTPExpires) {
+      return error(res, "Invalid or expired OTP.", 400);
+    }
+
+    // Check expiry
+    if (user.resetPasswordOTPExpires < new Date()) {
+      return error(
+        res,
+        "OTP has expired. Please request a new one.",
+        400
+      );
+    }
+
+    // Check OTP
+    if (user.resetPasswordOTP !== otp) {
+      return error(res, "Invalid OTP.", 400);
+    }
+
+    // Hash new password
+    const hashedPassword = await hashPassword(newPassword);
+
+    user.password = hashedPassword;
+
+    // Clear OTP after successful reset
+    user.resetPasswordOTP = null;
+    user.resetPasswordOTPExpires = null;
+    user.resetPasswordOTPAttempts = 0;
+
+    await user.save();
+
+    return success(
+      res,
+      {},
+      "Password reset successfully. You can now log in."
+    );
+  } catch (err) {
+    next(err);
+  }
+};
 module.exports = {
   registerValidators,
   loginValidators,
@@ -143,4 +334,7 @@ module.exports = {
   login,
   me,
   logout,
+  forgotPassword,
+  verifyResetOTP,
+  resetPassword,
 };

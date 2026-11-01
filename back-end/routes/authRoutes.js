@@ -2,6 +2,7 @@ const express = require("express");
 const rateLimit = require("express-rate-limit");
 const authMiddleware = require("../middleware/authMiddleware");
 const { optionalAuth } = require("../middleware/authMiddleware");
+
 const {
   registerValidators,
   loginValidators,
@@ -9,6 +10,9 @@ const {
   login,
   me,
   logout,
+  forgotPassword,
+  verifyResetOTP,
+  resetPassword,
 } = require("../controllers/authController");
 
 const router = express.Router();
@@ -25,8 +29,18 @@ const authLimiter = rateLimit({
 });
 
 router.post("/register", authLimiter, registerValidators, register);
+
 router.post("/login", authLimiter, loginValidators, login);
+
 router.get("/me", authMiddleware, me);
+
 router.post("/logout", optionalAuth, logout);
+
+// Password reset routes
+router.post("/forgot-password", authLimiter, forgotPassword);
+
+router.post("/verify-reset-otp", authLimiter, verifyResetOTP);
+
+router.post("/reset-password", authLimiter, resetPassword);
 
 module.exports = router;

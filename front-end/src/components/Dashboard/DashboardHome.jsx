@@ -401,7 +401,7 @@ export default function DashboardHome({
 
                 <span>
                   Upload your{" "}
-                  {activeType} for AI verification
+                  {activeType} to check prototype availability
                 </span>
 
                 <small>
@@ -600,12 +600,12 @@ export default function DashboardHome({
 
           <div>
             <strong>
-              AI-powered verification
+              Research prototype — verification unavailable
             </strong>
 
             <p>
-              Analyze text, images, documents,
-              videos and online sources.
+              Evidence-based factual verification is not implemented. Submissions
+              do not receive a factual verdict or confidence score.
             </p>
           </div>
         </div>

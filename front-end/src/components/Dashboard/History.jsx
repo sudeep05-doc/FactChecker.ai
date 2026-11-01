@@ -1,5 +1,13 @@
 import { useContext, useMemo, useState } from "react";
 import { AppContext } from "../../context/AppContext";
+import { getPredictionPresentation } from "../../utils/prediction";
+
+const isDatasetClassification = (item) =>
+  item?.predictionType === "dataset_classification" ||
+  item?.prediction_type === "dataset_classification";
+
+const getDatasetLabel = (item) =>
+  String(item?.datasetPrediction || item?.dataset_prediction || "").toUpperCase();
 
 const History = () => {
   const {
@@ -30,8 +38,7 @@ const History = () => {
 
     return history.filter((item) => {
       const text = item?.text || "";
-      const label = item?.label || "";
-      const itemConfidence = Number(item?.confidence || 0);
+      const itemScore = getPredictionPresentation(item).score;
       const itemDate = getDate(item);
 
       const matchesSearch = text
@@ -41,12 +48,17 @@ const History = () => {
       const matchesResult =
         resultFilter === "all" ||
         (resultFilter === "real" &&
-          label === "Real News") ||
+          isDatasetClassification(item) &&
+          ["REAL", "REAL NEWS"].includes(getDatasetLabel(item))) ||
         (resultFilter === "fake" &&
-          label === "Fake News");
+          isDatasetClassification(item) &&
+          ["FAKE", "FAKE NEWS"].includes(getDatasetLabel(item)));
 
       const matchesConfidence =
-        itemConfidence >= confidence;
+        confidence === 0 ||
+        (isDatasetClassification(item) &&
+          itemScore !== null &&
+          itemScore >= confidence);
 
       let matchesDate = true;
 
@@ -88,11 +100,15 @@ const History = () => {
   ]);
 
   const realCount = history.filter(
-    (item) => item.label === "Real News"
+    (item) =>
+      isDatasetClassification(item) &&
+      ["REAL", "REAL NEWS"].includes(getDatasetLabel(item))
   ).length;
 
   const fakeCount = history.filter(
-    (item) => item.label === "Fake News"
+    (item) =>
+      isDatasetClassification(item) &&
+      ["FAKE", "FAKE NEWS"].includes(getDatasetLabel(item))
   ).length;
 
   const deleteAnalysis = (id) => {
@@ -131,7 +147,7 @@ const History = () => {
   };
 
   const getThumbnailText = (text) => {
-    if (!text) return "Verified Content";
+    if (!text) return "Submitted Content";
 
     return text.length > 85
       ? `${text.substring(0, 85)}...`
@@ -139,15 +155,16 @@ const History = () => {
   };
 
   const viewReport = (item) => {
-    const result =
-      item.label === "Real News"
-        ? "REAL"
-        : "FAKE";
+    const presentation = getPredictionPresentation(item);
+    const predictionSummary = presentation.summary;
+    const scoreSummary =
+      isDatasetClassification(item) && presentation.score !== null
+        ? `\nDataset-classification score: ${presentation.score}% (${presentation.scoreSemantics === "uncalibrated_dataset_score" ? "uncalibrated" : "calibrated class probability"})`
+        : "";
 
     window.alert(
-      `Verification Report\n\n` +
-      `Prediction: ${result}\n` +
-      `Confidence: ${item.confidence}%\n` +
+      `Prediction History Record\n\n` +
+      `${predictionSummary}${scoreSummary}\n` +
       `Date: ${formatDate(item)}\n\n` +
       `${item.text}`
     );
@@ -172,8 +189,8 @@ const History = () => {
           </h1>
 
           <p>
-            Review, filter and manage all your
-            previously verified content.
+            Review saved records. Legacy predictions are unverified, and
+            dataset labels are not factual verdicts.
           </p>
         </div>
 
@@ -266,7 +283,7 @@ const History = () => {
 
           <div className="confidence-filter-title">
             <span>
-              Confidence (%)
+              Dataset score (%)
             </span>
 
             <strong>
@@ -320,7 +337,7 @@ const History = () => {
             }
           >
             <span>✓</span>
-            Real
+            Dataset REAL
           </button>
 
           <button
@@ -334,7 +351,7 @@ const History = () => {
             }
           >
             <span>■</span>
-            Fake
+            Dataset FAKE
           </button>
 
         </div>
@@ -352,7 +369,7 @@ const History = () => {
             {history.length}
           </strong>
           <span>
-            Total Verifications
+            Total Records
           </span>
         </div>
 
@@ -361,7 +378,7 @@ const History = () => {
             {realCount}
           </strong>
           <span>
-            Real Content
+            Dataset REAL labels
           </span>
         </div>
 
@@ -370,7 +387,7 @@ const History = () => {
             {fakeCount}
           </strong>
           <span>
-            Fake Content
+            Dataset FAKE labels
           </span>
         </div>
 
@@ -395,8 +412,18 @@ const History = () => {
 
           {filteredHistory.map((item) => {
 
+            const isDataset =
+              isDatasetClassification(item);
+            const datasetLabel = getDatasetLabel(item);
             const isReal =
-              item.label === "Real News";
+              isDataset &&
+              ["REAL", "REAL NEWS"].includes(datasetLabel);
+            const isFake =
+              isDataset &&
+              ["FAKE", "FAKE NEWS"].includes(datasetLabel);
+            const isMock = item.isMock ?? item.is_mock;
+            const presentation = getPredictionPresentation(item);
+            const predictionSummary = presentation.summary;
 
             const image =
               item.image ||
@@ -422,15 +449,19 @@ const History = () => {
                   {image ? (
                     <img
                       src={image}
-                      alt="Verified content"
+                      alt="Submitted content"
                     />
                   ) : (
                     <div className="history-generated-preview">
 
                       <span>
-                        {isReal
-                          ? "✓ VERIFIED"
-                          : "⚠ REVIEW"}
+                        {isDataset
+                          ? "DATASET LABEL"
+                          : item.predictionType === "evidence_verification"
+                            ? presentation.kind === "evidence_verdict"
+                              ? "EVIDENCE VERDICT"
+                              : "NOT VERIFIED"
+                            : "LEGACY UNVERIFIED"}
                       </span>
 
                       <strong>
@@ -440,7 +471,13 @@ const History = () => {
                       </strong>
 
                       <small>
-                        AI Verification Result
+                        {isMock
+                          ? "Mock placeholder; no model inference"
+                          : isDataset
+                          ? "Not a factual verification"
+                          : presentation.kind === "evidence_verdict"
+                            ? "Evidence status: " + (item.evidenceStatus || "evaluated")
+                            : "Prediction semantics unavailable"}
                       </small>
 
                     </div>
@@ -450,12 +487,16 @@ const History = () => {
                     className={`history-image-label ${
                       isReal
                         ? "real-label"
-                        : "fake-label"
+                        : isFake
+                          ? "fake-label"
+                          : ""
                     }`}
                   >
-                    {isReal
-                      ? "REAL"
-                      : "FAKE"}
+                    {isDataset
+                      ? datasetLabel || "UNKNOWN"
+                      : item.predictionType === "evidence_verification"
+                        ? item.verdict || "UNAVAILABLE"
+                        : "UNVERIFIED"}
                   </span>
 
                 </div>
@@ -466,30 +507,27 @@ const History = () => {
 
                   <div className="history-prediction">
 
-                    <span>
-                      Prediction:
-                    </span>
+                    <span>Result type:</span>
 
                     <strong
-                      className={
-                        isReal
-                          ? "prediction-real"
-                          : "prediction-fake"
-                      }
+                      className={isReal ? "prediction-real" : isFake ? "prediction-fake" : ""}
                     >
-                      {isReal
-                        ? "REAL"
-                        : "FAKE"}
+                      {predictionSummary}
                     </strong>
 
                   </div>
 
-                  <div className="history-confidence-text">
-                    Confidence:{" "}
-                    <strong>
-                      {item.confidence}%
-                    </strong>
-                  </div>
+                  {isDataset && presentation.score !== null && (
+                    <div className="history-confidence-text">
+                      Dataset-classification score:{" "}
+                      <strong>
+                        {presentation.score}%
+                        {presentation.scoreSemantics === "uncalibrated_dataset_score"
+                          ? " (uncalibrated; not factual confidence)"
+                          : " (class probability; not factual confidence)"}
+                      </strong>
+                    </div>
+                  )}
 
                   <div className="history-date-text">
                     Date:{" "}
@@ -508,9 +546,7 @@ const History = () => {
                     viewReport(item)
                   }
                 >
-                  <span>
-                    Click to view report
-                  </span>
+                  <span>View record details</span>
 
                   <strong>
                     →
@@ -546,8 +582,8 @@ const History = () => {
           </h2>
 
           <p>
-            Try changing your search or
-            filter settings.
+            Try changing your search or filters. This does not indicate that a
+            claim was verified.
           </p>
 
           <button

@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { AppContext } from "../../context/AppContext";
 import { ThemeContext } from "../../context/ThemeContext";
 
@@ -18,6 +18,21 @@ const Profile = () => {
     about: profile?.about || "",
     photo: profile?.photo || "",
   });
+
+  useEffect(() => {
+  if (!profile) return;
+
+  setFormData({
+    name: profile.name || "Student",
+    email: profile.email || "",
+    role: profile.role || "Verifier",
+    college: profile.college || "",
+    course: profile.course || "",
+    year: profile.year || "Final Year",
+    about: profile.about || "",
+    photo: profile.photo || "",
+  });
+}, [profile]);
 
   const initials = useMemo(() => {
     const name = formData.name?.trim();
@@ -79,14 +94,60 @@ const Profile = () => {
     reader.readAsDataURL(file);
   };
 
-  const saveProfile = (event) => {
-    event.preventDefault();
+  const saveProfile = async (event) => {
+  event.preventDefault();
 
-    setProfile(formData);
+  try {
+    const token = localStorage.getItem("fc_token");
+
+    if (!token) {
+      alert("Your session has expired. Please log in again.");
+      return;
+    }
+
+    const response = await fetch(
+      "http://localhost:5000/api/users/profile",
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Failed to update profile."
+      );
+    }
+
+    const updatedProfile = data.data;
+
+    // Update React context
+    setProfile(updatedProfile);
+
+    // Keep the stored profile synchronized
+    localStorage.setItem(
+      "fc_profile",
+      JSON.stringify(updatedProfile)
+    );
+
     setEditing(false);
 
     alert("Profile updated successfully.");
-  };
+  } catch (error) {
+    console.error("Profile update error:", error);
+
+    alert(
+      error.message ||
+        "Unable to update profile. Please try again."
+    );
+  }
+};
 
   const openSetting = (setting) => {
     if (setting === "profile") {

@@ -1,0 +1,39 @@
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Logs and generated files
+*.log
+logs/
+models/cache/
+uploads/
+
+# macOS
+.DS_Store
+
+
+# Research datasets and generated experiment data
+/data/
+
+# Local research datasets outside AI service
+/research-data/
+
+# macOS metadata
+.DS_Store
+
+
+# Python test cache
+.pytest_cache/
+
+# macOS metadata
+.DS_Store

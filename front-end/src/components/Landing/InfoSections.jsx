@@ -45,8 +45,8 @@ const InfoSections = ({ openDashboard }) => {
               <h3>AI Analysis</h3>
 
               <p>
-                Our models analyze content using
-                multiple credibility signals.
+                Foundation-model adapters are research components; evidence
+                evaluation is not implemented.
               </p>
             </div>
           </article>
@@ -62,8 +62,8 @@ const InfoSections = ({ openDashboard }) => {
               <h3>Get Results</h3>
 
               <p>
-                Receive a confidence score and
-                detailed report instantly.
+                The current prototype reports that factual verification is
+                unavailable; it generates no verdict or confidence score.
               </p>
             </div>
           </article>
@@ -79,8 +79,8 @@ const InfoSections = ({ openDashboard }) => {
               <h3>Stay Informed</h3>
 
               <p>
-                Make better decisions and share
-                verified information responsibly.
+                Do not treat dataset-label experiments or mock responses as
+                verified information.
               </p>
             </div>
           </article>
@@ -139,12 +139,11 @@ const InfoSections = ({ openDashboard }) => {
             <article className="feature-card">
               <span>◎</span>
 
-              <h3>Confidence Score</h3>
+              <h3>Score Semantics</h3>
 
               <p>
-                Every prediction includes a detailed
-                confidence percentage for better
-                transparency.
+                Dataset-classification scores are not factual confidence and
+                are not evidence-backed verdicts.
               </p>
             </article>
 

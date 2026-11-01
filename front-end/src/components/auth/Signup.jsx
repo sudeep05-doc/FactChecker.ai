@@ -1,8 +1,6 @@
 import { useMemo, useState } from "react";
 import "./Signup.css";
 
-const USERS_KEY = "fc_users";
-
 function ShieldIcon({ className = "" }) {
   return (
     <svg
@@ -156,101 +154,72 @@ function SignupPage({ onLogin, openDashboard, backHome }) {
     }
 
     if (!agreeTerms) {
-      return "Please agree to the Terms and Privacy Policy.";
+  return "Please agree to the Terms and Privacy Policy.";
+}
+
+return "";
+};
+
+  const handleSubmit = async (event) => {
+  event.preventDefault();
+
+  const validationError = validate();
+
+  if (validationError) {
+    setError(validationError);
+    return;
+  }
+
+  setLoading(true);
+  setError("");
+
+  try {
+    const response = await fetch("http://localhost:5000/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        fullName: form.fullName.trim(),
+        username: form.username.trim(),
+        email: form.email.trim().toLowerCase(),
+        phone: form.phone.trim(),
+        password: form.password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Registration failed.");
     }
 
-    const users = JSON.parse(
-      localStorage.getItem(USERS_KEY) || "[]"
-    );
-
-    const emailExists = users.some(
-      (user) =>
-        user.email?.toLowerCase() ===
-        form.email.trim().toLowerCase()
-    );
-
-    if (emailExists) {
-      return "An account with this email already exists.";
-    }
-
-    const usernameExists = users.some(
-      (user) =>
-        user.username?.toLowerCase() ===
-        form.username.trim().toLowerCase()
-    );
-
-    if (usernameExists) {
-      return "That username is already taken.";
-    }
-
-    return "";
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    const validationError = validate();
-
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
-    setLoading(true);
-
-    const users = JSON.parse(
-      localStorage.getItem(USERS_KEY) || "[]"
-    );
-
-    const newUser = {
-      id: Date.now(),
-      fullName: form.fullName.trim(),
-      username: form.username.trim(),
-      email: form.email.trim().toLowerCase(),
-      phone: form.phone.trim(),
-      password: form.password,
-      createdAt: new Date().toISOString(),
-    };
-
-    localStorage.setItem(
-      USERS_KEY,
-      JSON.stringify([...users, newUser])
-    );
-
-    localStorage.setItem(
-      "fc_profile",
-      JSON.stringify({
-        name: newUser.fullName,
-        college: "",
-        email: newUser.email,
-        course: "",
-        year: "Final Year",
-        role: "User",
-        about: "",
-        photo: "",
-        username: newUser.username,
-        phone: newUser.phone,
-      })
-    );
-
+    // Store authentication information returned by backend
+    localStorage.setItem("fc_token", data.data.token);
     localStorage.setItem(
       "fc_current_user",
-      JSON.stringify({
-        id: newUser.id,
-        fullName: newUser.fullName,
-        username: newUser.username,
-        email: newUser.email,
-      })
+      JSON.stringify(data.data.user)
+    );
+    localStorage.setItem(
+      "fc_profile",
+      JSON.stringify(data.data.profile)
     );
 
-    setTimeout(() => {
-      setLoading(false);
+    setLoading(false);
 
-      if (openDashboard) {
-        openDashboard();
-      }
-    }, 500);
-  };
+    if (openDashboard) {
+      openDashboard();
+    }
+  } catch (err) {
+    console.error("Signup error:", err);
+
+    setError(
+      err.message || "Unable to create account. Please try again."
+    );
+
+    setLoading(false);
+  }
+};
 
   return (
     <main className="signup-modern-page">
@@ -824,4 +793,3 @@ function SignupPage({ onLogin, openDashboard, backHome }) {
 }
 
 export default SignupPage;
-
