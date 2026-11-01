@@ -27,6 +27,20 @@ import {
 const simulateDelay = (ms = 300) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
+const shuffleNews = (news) => {
+  const shuffled = [...news];
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [
+      shuffled[swapIndex],
+      shuffled[index],
+    ];
+  }
+
+  return shuffled;
+};
+
 export const newsService = {
   /**
    * Get global news articles
@@ -75,8 +89,9 @@ export const newsService = {
       ...globalNews,
       ...indiaNews,
       ...recommendedNews,
+      ...forYouNews,
     ];
-    return allNews.sort(() => Math.random() - 0.5).slice(0, 20);
+    return shuffleNews(allNews).slice(0, 20);
   },
 
   /**
@@ -171,9 +186,9 @@ export const newsService = {
       ...globalNews,
       ...indiaNews,
       ...recommendedNews,
+      ...forYouNews,
     ];
-    // Reshuffle the array
-    return allNews.sort(() => Math.random() - 0.5);
+    return shuffleNews(allNews);
   },
 };
 

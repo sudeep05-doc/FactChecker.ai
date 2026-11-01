@@ -15,17 +15,28 @@ export const AppProvider = ({
         Profile
      =========================== */
 
-  const [profile, setProfile] =
-    useState({
-      name: "Student",
-      college: "",
+  const [profile, setProfile] = useState(() => {
+    const savedProfile = localStorage.getItem("fc_profile");
+
+    if (savedProfile) {
+      try {
+        return JSON.parse(savedProfile);
+      } catch {
+        // Use default profile if saved data is invalid.
+      }
+    }
+
+    return {
+      name: "Guest User",
       email: "",
+      college: "",
       course: "",
-      year: "Final Year",
-      role: "Final Year Project",
+      year: "Not specified",
+      role: "User",
       about: "",
       photo: "",
-    });
+    };
+  });
 
   /* ===========================
         Analysis History

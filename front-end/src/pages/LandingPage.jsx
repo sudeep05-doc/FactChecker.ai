@@ -1,3 +1,4 @@
+
 import Navbar from "../components/Landing/Navbar";
 import HeroSection from "../components/Landing/HeroSection";
 import InfoSections from "../components/Landing/InfoSections";
@@ -11,6 +12,13 @@ function LandingPage({
   openAbout,
   openLearnMore,
 }) {
+  // Landing page buttons should open Login first.
+  const goToLogin = () => {
+    if (openLogin) {
+      openLogin();
+    }
+  };
+
   return (
     <div className="page-enter landing-page">
 
@@ -24,12 +32,12 @@ function LandingPage({
       />
 
       <HeroSection
-        openDashboard={openDashboard}
+        openDashboard={goToLogin}
         openLearnMore={openLearnMore}
       />
 
       <InfoSections
-        openDashboard={openDashboard}
+        openDashboard={goToLogin}
       />
 
       <Footer />
