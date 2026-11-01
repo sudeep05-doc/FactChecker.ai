@@ -43,7 +43,7 @@ const Sidebar = ({
     {
       id: "profile",
       icon: "◉",
-      title: "Student Profile",
+      title: "User Profile",
     },
     {
   id: "feedback",

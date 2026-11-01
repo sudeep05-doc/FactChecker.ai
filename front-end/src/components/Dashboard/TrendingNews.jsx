@@ -1,4 +1,9 @@
-import { useMemo, useState, useEffect } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import newsService from "../../services/newsService";
 import "./TrendingNews.css";
 
@@ -25,6 +30,33 @@ function ArticleImage({ src, alt, className = "" }) {
   );
 }
 
+function loadArticleIds(storageKey) {
+  try {
+    const storedIds = localStorage.getItem(storageKey);
+
+    if (!storedIds) {
+      return [];
+    }
+
+    const parsedIds = JSON.parse(storedIds);
+    return Array.isArray(parsedIds) ? parsedIds : [];
+  } catch (error) {
+    console.error(`Unable to load ${storageKey}:`, error);
+    return [];
+  }
+}
+
+async function fetchAllNews() {
+  const [global, india, forYou, recommended] = await Promise.all([
+    newsService.getGlobalNews(),
+    newsService.getIndiaNews(),
+    newsService.getForYouNews(),
+    newsService.getRecommendedNews(),
+  ]);
+
+  return { global, india, forYou, recommended };
+}
+
 /* =========================================================
    TRENDING NEWS MAIN COMPONENT
 ========================================================= */
@@ -34,11 +66,19 @@ export default function TrendingNews({ setActiveView }) {
   const [tab, setTab] = useState("For You");
   const [category, setCategory] = useState("All Categories");
   const [refreshing, setRefreshing] = useState(false);
-  const [savedArticles, setSavedArticles] = useState([]);
-  const [likedArticles, setLikedArticles] = useState([]);
+  const [savedArticles, setSavedArticles] = useState(() =>
+    loadArticleIds("verifyai_saved_articles")
+  );
+  const [likedArticles, setLikedArticles] = useState(() =>
+    loadArticleIds("verifyai_liked_articles")
+  );
   const [activeSlide, setActiveSlide] = useState(0);
   const [topRegion, setTopRegion] = useState("Global");
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [topicSearch, setTopicSearch] = useState("");
+  const [topicResults, setTopicResults] = useState(null);
+  const [loadError, setLoadError] = useState("");
+  const topicSearchRequest = useRef(0);
   const [newsData, setNewsData] = useState({
     global: [],
     india: [],
@@ -46,54 +86,70 @@ export default function TrendingNews({ setActiveView }) {
     recommended: [],
   });
   const [loading, setLoading] = useState(true);
+  const [searchingTopic, setSearchingTopic] = useState(false);
+
+  // Load all news data
+  const loadAllNews = useCallback(async () => {
+    try {
+      setNewsData(await fetchAllNews());
+      setLoadError("");
+    } catch (error) {
+      console.error("Error loading news:", error);
+      setLoadError("Unable to load trending news. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const retryLoadNews = () => {
+    setLoading(true);
+    loadAllNews();
+  };
 
   // Load data on mount
   useEffect(() => {
-    loadAllNews();
-    loadSavedAndLiked();
+    let cancelled = false;
+
+    const loadInitialNews = async () => {
+      try {
+        const news = await fetchAllNews();
+
+        if (!cancelled) {
+          setNewsData(news);
+          setLoadError("");
+        }
+      } catch (error) {
+        console.error("Error loading news:", error);
+
+        if (!cancelled) {
+          setLoadError("Unable to load trending news. Please try again.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadInitialNews();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Auto-slide hero every 5 seconds
   useEffect(() => {
-    if (!selectedArticle) {
-      const interval = setInterval(() => {
-        setActiveSlide((prev) =>
-          (prev + 1) % Math.max(filteredNews.length, 1)
-        );
-      }, 5000);
-      return () => clearInterval(interval);
+    if (selectedArticle || filteredNews.length < 2) {
+      return undefined;
     }
-  }, [selectedArticle]);
 
-  // Load all news data
-  const loadAllNews = async () => {
-    setLoading(true);
-    try {
-      const [global, india, forYou, recommended] = await Promise.all([
-        newsService.getGlobalNews(),
-        newsService.getIndiaNews(),
-        newsService.getForYouNews(),
-        newsService.getRecommendedNews(),
-      ]);
-      setNewsData({ global, india, forYou, recommended });
-    } catch (error) {
-      console.error("Error loading news:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const interval = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % filteredNews.length);
+    }, 5000);
 
-  // Load saved and liked from localStorage
-  const loadSavedAndLiked = () => {
-    const saved = localStorage.getItem(
-      "verifyai_saved_articles"
-    );
-    const liked = localStorage.getItem(
-      "verifyai_liked_articles"
-    );
-    if (saved) setSavedArticles(JSON.parse(saved));
-    if (liked) setLikedArticles(JSON.parse(liked));
-  };
+    return () => clearInterval(interval);
+  }, [selectedArticle, filteredNews.length]);
 
   // Save to localStorage when state changes
   useEffect(() => {
@@ -111,25 +167,19 @@ export default function TrendingNews({ setActiveView }) {
   }, [likedArticles]);
 
   // Filter news based on tab and category
-  const filteredNews = useMemo(() => {
-    let result = [];
-
-    if (tab === "For You") {
-      result = newsData.forYou;
-    } else if (tab === "Global") {
-      result = newsData.global;
-    } else if (tab === "India") {
-      result = newsData.india;
-    }
-
-    if (category !== "All Categories") {
-      result = result.filter(
+  const newsForTab =
+    topicResults ??
+    (tab === "For You"
+      ? newsData.forYou
+      : tab === "Global"
+        ? newsData.global
+        : newsData.india);
+  const filteredNews =
+    category === "All Categories"
+      ? newsForTab
+      : newsForTab.filter(
         (item) => item.category === category
       );
-    }
-
-    return result.length ? result : [];
-  }, [tab, category, newsData]);
 
   // Get hero article (featured article)
   const heroArticle =
@@ -170,14 +220,93 @@ export default function TrendingNews({ setActiveView }) {
   const refreshNews = async () => {
     setRefreshing(true);
     try {
-      await newsService.refreshNews();
-      // Reshuffle the news
-      await loadAllNews();
+      const refreshedNews = await newsService.refreshNews();
+      const articleOrder = new Map(
+        refreshedNews.map((article, index) => [article.id, index])
+      );
+      const reorderArticles = (articles) =>
+        [...articles].sort(
+          (left, right) =>
+            articleOrder.get(left.id) - articleOrder.get(right.id)
+        );
+
+      setNewsData((currentNews) => ({
+        global: reorderArticles(currentNews.global),
+        india: reorderArticles(currentNews.india),
+        forYou: reorderArticles(currentNews.forYou),
+        recommended: reorderArticles(currentNews.recommended),
+      }));
       setActiveSlide(0);
+      setLoadError("");
     } catch (error) {
       console.error("Error refreshing news:", error);
+      setLoadError("Unable to refresh trending news. Please try again.");
     } finally {
       setRefreshing(false);
+    }
+  };
+
+  const searchTopic = async (label, query) => {
+    const requestId = topicSearchRequest.current + 1;
+    topicSearchRequest.current = requestId;
+    setTab("For You");
+    setTopicSearch(label);
+    setTopicResults([]);
+    setCategory("All Categories");
+    setActiveSlide(0);
+    setSearchingTopic(true);
+    setLoadError("");
+
+    try {
+      const results = await newsService.searchNews(query);
+      if (topicSearchRequest.current === requestId) {
+        setTopicResults(results);
+      }
+    } catch (error) {
+      if (topicSearchRequest.current === requestId) {
+        console.error("Error searching trending news:", error);
+        setLoadError("Unable to search trending news. Please try again.");
+        setTopicResults([]);
+      }
+    } finally {
+      if (topicSearchRequest.current === requestId) {
+        setSearchingTopic(false);
+      }
+    }
+  };
+
+  const clearTopicSearch = () => {
+    topicSearchRequest.current += 1;
+    setTopicSearch("");
+    setTopicResults(null);
+    setSearchingTopic(false);
+    setLoadError("");
+    setActiveSlide(0);
+  };
+
+  const shareArticle = async (article) => {
+    const shareData = {
+      title: article.title,
+      text: article.description,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(
+          `${article.title}\n${article.description}\n${shareData.url}`
+        );
+        window.alert("Article details copied to clipboard.");
+      } else {
+        window.alert("Sharing is not supported in this browser.");
+      }
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Error sharing article:", error);
+        window.alert("Unable to share this article.");
+      }
     }
   };
 
@@ -195,6 +324,7 @@ export default function TrendingNews({ setActiveView }) {
         isLiked={likedArticles.includes(
           selectedArticle.id
         )}
+        onShare={shareArticle}
         setActiveView={setActiveView}
       />
     );
@@ -244,6 +374,7 @@ export default function TrendingNews({ setActiveView }) {
                 onClick={() => {
                   setTab(name);
                   setCategory("All Categories");
+                  clearTopicSearch();
                   setActiveSlide(0);
                 }}
               >
@@ -281,8 +412,40 @@ export default function TrendingNews({ setActiveView }) {
           </div>
         </div>
 
+        {topicSearch && (
+          <div className="topic-search-status">
+            <span>Showing results for {topicSearch}</span>
+            <button type="button" onClick={clearTopicSearch}>
+              Clear filter
+            </button>
+          </div>
+        )}
+
+        {loadError && (
+          <div className="trending-error" role="alert">
+            <span>{loadError}</span>
+            <button type="button" onClick={retryLoadNews}>
+              Try again
+            </button>
+          </div>
+        )}
+
         {/* HERO STORY CARD */}
-        {heroArticle ? (
+        {loading || searchingTopic ? (
+          <div className="empty-state" role="status">
+            <span>◌</span>
+            <h2>
+              {searchingTopic
+                ? "Searching trending news"
+                : "Loading trending news"}
+            </h2>
+            <p>
+              {searchingTopic
+                ? "Finding stories about this topic."
+                : "Gathering the latest stories for you."}
+            </p>
+          </div>
+        ) : heroArticle ? (
           <>
             <div className="hero-story-card">
               <div
@@ -405,6 +568,7 @@ export default function TrendingNews({ setActiveView }) {
                   setCategory(
                     "All Categories"
                   );
+                  clearTopicSearch();
                   setActiveSlide(0);
                 }}
               />
@@ -421,6 +585,7 @@ export default function TrendingNews({ setActiveView }) {
                   setCategory(
                     "All Categories"
                   );
+                  clearTopicSearch();
                   setActiveSlide(0);
                 }}
               />
@@ -542,7 +707,12 @@ export default function TrendingNews({ setActiveView }) {
                 </h3>
                 <button
                   onClick={() =>
-                    setTab("For You")
+                    {
+                      setTab("For You");
+                      setCategory("All Categories");
+                      clearTopicSearch();
+                      setActiveSlide(0);
+                    }
                   }
                 >
                   View All
@@ -683,7 +853,15 @@ export default function TrendingNews({ setActiveView }) {
                     </span>
                   </article>
                 ))}
-              <button className="view-trending-btn">
+              <button
+                className="view-trending-btn"
+                onClick={() => {
+                  setTab(topRegion);
+                  setCategory("All Categories");
+                  clearTopicSearch();
+                  setActiveSlide(0);
+                }}
+              >
                 View All Trending{" "}
                 <span>→</span>
               </button>
@@ -698,29 +876,21 @@ export default function TrendingNews({ setActiveView }) {
           <span>#</span> Popular Topics
         </strong>
         {[
-          "# AI & Technology",
-          "# Stock Market",
-          "# IPL 2025",
-          "# Climate Change",
-          "# Budget 2025",
-          "# World Politics",
-        ].map((topic) => (
+          ["# AI & Technology", "AI"],
+          ["# Stock Market", "market"],
+          ["# IPL 2025", "IPL"],
+          ["# Climate Change", "climate"],
+          ["# Budget 2025", "budget"],
+          ["# World Politics", "politics"],
+        ].map(([topic, query]) => (
           <button
             key={topic}
-            onClick={async () => {
-              const results =
-                await newsService.searchNews(
-                  topic.replace("# ", "")
-                );
-              // Filter news to show search results
-            }}
+            className={topicSearch === topic ? "active" : ""}
+            onClick={() => searchTopic(topic, query)}
           >
             {topic}
           </button>
         ))}
-        <button className="topics-next">
-          ›
-        </button>
       </section>
     </div>
   );
@@ -824,6 +994,7 @@ function ArticleReader({
   onLike,
   isSaved,
   isLiked,
+  onShare,
   setActiveView,
 }) {
   return (
@@ -880,33 +1051,13 @@ function ArticleReader({
 
         {/* Body */}
         <article className="article-body">
-          <p>
-            The latest developments
-            surrounding this story are
-            attracting significant attention from
-            readers around the world. Here's what
-            you need to know about the latest
-            update.
-          </p>
-
-          <h2>What's happening?</h2>
-
-          <p>
-            {article.description} The
-            development is being closely
-            followed by experts, organizations
-            and the public as more information
-            becomes available.
-          </p>
-
-          <p>
-            According to the latest reports, the
-            situation continues to develop.
-            Officials and analysts are
-            monitoring new information and
-            evaluating what it could mean in the
-            coming days.
-          </p>
+          <h2>Story summary</h2>
+          <p>{article.content || article.description}</p>
+          {!article.content && (
+            <p className="article-preview-note">
+              Full article text is not available in this news preview.
+            </p>
+          )}
 
           <div className="article-highlight">
             <span>✓</span>
@@ -924,23 +1075,10 @@ function ArticleReader({
             </div>
           </div>
 
-          <h2>Why it matters</h2>
-
+          <h2>Verify before sharing</h2>
           <p>
-            This story could have an impact
-            beyond the immediate event.
-            Understanding the available
-            evidence and separating confirmed
-            information from speculation is
-            important when following developing
-            news.
-          </p>
-
-          <p>
-            FactChecker will continue
-            monitoring this story and provide
-            updates as new verified information
-            becomes available.
+            Check the original source and compare important claims with
+            reliable, independent reporting before sharing.
           </p>
         </article>
 
@@ -965,7 +1103,9 @@ function ArticleReader({
               : "🔖 Save Article"}
           </button>
 
-          <button type="button">↗ Share</button>
+          <button type="button" onClick={() => onShare(article)}>
+            ↗ Share
+          </button>
 
           <button
             type="button"

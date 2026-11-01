@@ -89,6 +89,8 @@ function LoginPage({
       JSON.stringify(data.data.profile)
     );
 
+    localStorage.removeItem("fc_guest_mode");
+
     console.log(
       "Login successful:",
       data.data.user
@@ -114,6 +116,31 @@ function LoginPage({
   // ============================================
 
   const handleGuest = () => {
+    // Clear any previous guest session information.
+    localStorage.removeItem("fc_token");
+    localStorage.removeItem("fc_current_user");
+
+    // Activate guest mode.
+    localStorage.setItem("fc_guest_mode", "true");
+
+    // Set a default guest profile.
+    const guestProfile = {
+      name: "Guest User",
+      email: "",
+      role: "Guest",
+      college: "",
+      course: "",
+      year: "Not specified",
+      about: "",
+      photo: "",
+    };
+
+    localStorage.setItem(
+      "fc_profile",
+      JSON.stringify(guestProfile)
+    );
+
+    // Open dashboard.
     if (openDashboard) {
       openDashboard();
     }

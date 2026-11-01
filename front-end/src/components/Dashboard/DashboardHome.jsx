@@ -151,6 +151,15 @@ export default function DashboardHome({
     handleFile(file);
   };
 
+  const handleRemoveFile = (event) => {
+    event.stopPropagation();
+    setSelectedFile(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleDrop = (event) => {
     event.preventDefault();
 
@@ -377,6 +386,16 @@ export default function DashboardHome({
 
             {selectedFile ? (
               <>
+                <button
+                  type="button"
+                  className="remove-upload-button"
+                  aria-label="Remove uploaded file"
+                  title="Remove uploaded file"
+                  onClick={handleRemoveFile}
+                >
+                  ×
+                </button>
+
                 <strong>
                   {selectedFile.name}
                 </strong>
