@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { generateVerificationPDF } from "../../utils/generateVerificationPDF";
+import { getPredictionPresentation } from "../../utils/prediction";
 import "./VerificationResult.css";
 
 const VerificationResult = ({
@@ -29,50 +30,62 @@ const VerificationResult = ({
     );
   }
 
+  const presentation = getPredictionPresentation(result);
+  const isDatasetClassification =
+    presentation.kind === "dataset_classification";
+  const isEvidenceEvaluated =
+    presentation.kind === "evidence_verdict";
+  const isUnavailable = !isDatasetClassification && !isEvidenceEvaluated;
+  const datasetPrediction =
+    result.datasetPrediction ?? result.dataset_prediction;
+  const datasetIdentity =
+    result.datasetIdentity ?? result.dataset_identity;
+  const mockStatus = result.isMock ?? result.is_mock;
   const isFake =
-    result.label === "Fake News" ||
-    result.label === "Likely Fake";
-
-  const verdict = isFake
-    ? "Likely Fake"
-    : "Likely Authentic";
-
-  const confidence =
-    Number(result.confidence) || 0;
+    result.verdict === "REFUTED" ||
+    ["FAKE", "Fake News"].includes(datasetPrediction);
+  const isPositive =
+    result.verdict === "SUPPORTED" ||
+    ["REAL", "Real News"].includes(datasetPrediction);
+  const resultTone = isUnavailable || isDatasetClassification
+    ? ""
+    : isFake
+      ? "fake"
+      : isPositive
+        ? "real"
+        : "";
+  const verdict = presentation.title;
+  const confidence = presentation.score;
 
   const handleDownload = () => {
+    if (!isEvidenceEvaluated) {
+      return;
+    }
+
     generateVerificationPDF({
-      verdict,
-      confidence,
+      verdict: result.verdict,
+      confidence: null,
 
       contentType:
         result.contentType ||
-        "AI Content Verification",
+        "Submitted content",
 
       reportId:
         result.reportId ||
-        `VA-${Date.now()}`,
+        "Not generated",
 
       analysisSummary:
         result.explanation ||
-        "The submitted content was analyzed using AI-powered verification.",
+        "No explanation is available.",
 
       reasoning:
-        result.reasoning || [
-          "Content patterns were analyzed.",
-          "Source credibility was evaluated.",
-          "Writing style and consistency were reviewed.",
-          "The submitted claim was compared against verification signals.",
-        ],
+        Array.isArray(result.reasoning) ? result.reasoning : [],
 
-      recommendation:
-        isFake
-          ? "Verify the information using reliable sources before sharing."
-          : "The content appears credible based on the available verification signals.",
+      recommendation: "Review the cited evidence before relying on this result.",
 
       processingTime:
         result.processingTime ||
-        "1.8 seconds",
+        "Not run",
     });
   };
 
@@ -107,21 +120,7 @@ const VerificationResult = ({
   };
 
   const reasoning =
-    result.reasoning || [
-      isFake
-        ? "Suspicious wording or misinformation signals were detected."
-        : "The writing pattern appears consistent with credible reporting.",
-
-      result.trustedSource
-        ? "The submitted source matches a recognized trusted domain."
-        : "Source credibility requires additional verification.",
-
-      isFake
-        ? "The claim contains patterns commonly associated with misleading content."
-        : "No major credibility inconsistencies were detected.",
-
-      "AI verification should be considered as an assistance tool and not as a replacement for human fact-checking.",
-    ];
+    Array.isArray(result.reasoning) ? result.reasoning : [];
 
   return (
     <div className="verification-result-page">
@@ -139,12 +138,15 @@ const VerificationResult = ({
           </span>
 
           <h1>
-            Verification Result
+            {presentation.title}
           </h1>
 
           <p>
-            Review the assessment generated for your
-            submitted content.
+            {isDatasetClassification
+              ? "This output predicts a dataset label and is not an evidence-based factual verdict."
+              : isEvidenceEvaluated
+                ? "Review the verdict and its evaluated evidence."
+                : "Evidence-based factual verification is unavailable; no verdict was generated."}
           </p>
 
         </div>
@@ -168,10 +170,14 @@ const VerificationResult = ({
 
             <div
               className={`result-verdict-icon ${
-                isFake ? "fake" : "real"
+                resultTone
               }`}
             >
-              {isFake ? "!" : "✓"}
+              {isUnavailable || isDatasetClassification || (!isFake && !isPositive)
+                ? "?"
+                : isFake
+                  ? "!"
+                  : "✓"}
             </div>
 
             <div>
@@ -182,12 +188,14 @@ const VerificationResult = ({
 
               <span
                 className={`result-status ${
-                  isFake ? "fake" : "real"
+                  resultTone
                 }`}
               >
-                {isFake
-                  ? "Misinformation signals detected"
-                  : "Credibility signals detected"}
+                {isDatasetClassification
+                  ? `Dataset: ${datasetIdentity || "unspecified"}; not a factual verdict`
+                  : isEvidenceEvaluated
+                    ? "Verdict based on evaluated evidence"
+                    : "Evidence evaluation is not implemented"}
               </span>
 
             </div>
@@ -199,12 +207,13 @@ const VerificationResult = ({
 
         {/* CONFIDENCE */}
 
+        {confidence !== null && Number.isFinite(confidence) ? (
         <div className="result-confidence">
 
           <div className="confidence-heading">
 
             <span>
-              Confidence
+              {presentation.scoreLabel}
             </span>
 
             <strong>
@@ -216,9 +225,7 @@ const VerificationResult = ({
           <div className="confidence-track">
 
             <div
-              className={`confidence-fill ${
-                isFake ? "fake" : "real"
-              }`}
+              className={`confidence-fill ${resultTone}`}
               style={{
                 width: `${confidence}%`,
               }}
@@ -227,10 +234,21 @@ const VerificationResult = ({
           </div>
 
           <small>
-            AI assessment confidence
+            {presentation.scoreSemantics === "uncalibrated_dataset_score"
+              ? "Uncalibrated dataset score; not factual confidence"
+              : "Class probability; not factual confidence"}
           </small>
 
         </div>
+        ) : (
+          <div className="result-confidence">
+            <div className="confidence-heading">
+              <span>Confidence</span>
+              <strong>Not available</strong>
+            </div>
+            <small>No factual confidence score is produced.</small>
+          </div>
+        )}
 
       </section>
 
@@ -248,12 +266,16 @@ const VerificationResult = ({
         <div className="result-card-content">
 
           <h3>
-            AI Explanation
+            {isDatasetClassification
+              ? "Dataset-Label Scope"
+              : "Verification Status"}
           </h3>
 
           <p>
-            {result.explanation ||
-              "This is an AI-generated verification explanation based on the submitted content and available credibility signals."}
+            {isDatasetClassification
+              ? "The output is limited to the named dataset label; it does not establish whether a claim is true or false."
+              : result.explanation ||
+                "Evidence-based factual verification is not implemented."}
           </p>
 
         </div>
@@ -298,6 +320,13 @@ const VerificationResult = ({
                 </div>
 
               )
+            )}
+            {reasoning.length === 0 && (
+              <p>
+                {isDatasetClassification
+                  ? "No evidence was evaluated; this dataset label is not a factual verdict."
+                  : "No evidence-based reasoning is available."}
+              </p>
             )}
 
           </div>
@@ -357,7 +386,7 @@ const VerificationResult = ({
 
             <strong>
               {result.processingTime ||
-                "1.8 seconds"}
+                "Not run"}
             </strong>
 
           </div>
@@ -370,8 +399,7 @@ const VerificationResult = ({
             </span>
 
             <strong>
-              {result.reportId ||
-                "VA-" + Date.now()}
+              {result.reportId || "Not generated"}
             </strong>
 
           </div>
@@ -384,9 +412,15 @@ const VerificationResult = ({
             </span>
 
             <strong className="completed-status">
-              Completed
+              {result.status || "unavailable"}
             </strong>
+          </div>
 
+          <div className="verification-detail-row">
+            <span>Mock response</span>
+            <strong>
+              {mockStatus == null ? "Unknown" : mockStatus ? "Yes" : "No"}
+            </strong>
           </div>
 
         </div>
@@ -412,9 +446,12 @@ const VerificationResult = ({
 
         <button
           className="download-report-btn"
+          disabled={!isEvidenceEvaluated}
           onClick={handleDownload}
         >
-          ↓ Download Report
+          {isEvidenceEvaluated
+            ? "↓ Download Report"
+            : "Report unavailable"}
         </button>
 
       </div>

@@ -64,10 +64,8 @@ function AboutPage({
         </h1>
 
         <p>
-          FactChecker was created to make information
-          verification simple, accessible and intelligent.
-          Our goal is to help people understand what they
-          read before they trust or share it.
+          FactChecker is a research prototype for explainable multimodal
+          fact-checking. Evidence-based factual verification is not implemented.
         </p>
 
       </section>
@@ -84,8 +82,8 @@ function AboutPage({
           </span>
 
           <h2>
-            Truth should be
-            <span> easier to find.</span>
+            Research should be
+            <span> evidence-led.</span>
           </h2>
 
           <p>
@@ -96,9 +94,9 @@ function AboutPage({
           </p>
 
           <p>
-            FactChecker uses modern technology to help
-            users analyze information and understand
-            the reasoning behind every result.
+            The project explores open-source foundation models and reasoning
+            components. Current predictions, where present, are dataset-label
+            experiments and are not claims about factual truth.
           </p>
 
         </div>
@@ -125,15 +123,15 @@ function AboutPage({
               <div>
 
                 <small>
-                  AI ANALYSIS
+                  STATIC MOCKUP — NOT A RESULT
                 </small>
 
                 <h3>
-                  Information Verified
+                  Verification unavailable
                 </h3>
 
                 <p>
-                  High confidence result
+                  Evidence-based verification is not implemented.
                 </p>
 
               </div>
@@ -146,11 +144,11 @@ function AboutPage({
 
             <div className="verification-result">
               <strong>
-                92%
+                N/A
               </strong>
 
               <span>
-                Confidence
+                No factual score
               </span>
             </div>
 

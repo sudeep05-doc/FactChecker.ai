@@ -11,38 +11,38 @@ function FeaturesPage({
     {
       number: "01",
       icon: "✦",
-      title: "AI-Powered Analysis",
-      text: "Our intelligent system analyzes news content and identifies suspicious claims using advanced AI techniques.",
+      title: "Research Architecture",
+      text: "The project contains multimodal acquisition, representation, reasoning, and explanation components under research.",
     },
     {
       number: "02",
       icon: "◉",
-      title: "Real-Time Detection",
-      text: "Get fast analysis results so you can verify information before sharing or believing it.",
+      title: "Dataset-Label Experiments",
+      text: "Fakeddit classifiers predict distant-supervision dataset labels; these outputs are not factual verification.",
     },
     {
       number: "03",
       icon: "✓",
-      title: "High Accuracy",
-      text: "FactChecker evaluates multiple factors to provide reliable and easy-to-understand results.",
+      title: "Evidence Verification",
+      text: "Claim-evidence retrieval and evaluation are not implemented. The current service returns verification unavailable.",
     },
     {
       number: "04",
       icon: "⌁",
-      title: "Source Verification",
-      text: "Analyze the credibility and reliability of information sources before trusting a claim.",
+      title: "Open-Source Model Adapters",
+      text: "Research adapters for open-source models do not independently establish whether a claim is true.",
     },
     {
       number: "05",
       icon: "◈",
-      title: "Smart Explanations",
-      text: "Understand why a piece of information is classified as real, misleading, or potentially fake.",
+      title: "Structured Explanations",
+      text: "CMREA scaffolding is not an evidence-derived explanation until a validated evaluator supplies provenance.",
     },
     {
       number: "06",
       icon: "↓",
-      title: "Report & Download",
-      text: "Save your analysis results and generate useful reports for future reference.",
+      title: "Research Prototype",
+      text: "Unavailable responses do not produce verdicts, factual confidence scores, or evidence reports.",
     },
   ];
 
@@ -95,18 +95,17 @@ function FeaturesPage({
         <div className="hero-orb orb-two"></div>
 
         <span className="page-badge">
-          ✦ POWERFUL FEATURES
+          ✦ RESEARCH PROTOTYPE
         </span>
 
         <h1>
-          Everything you need to
-          <span> verify the truth.</span>
+          Researching explainable
+          <span> multimodal verification.</span>
         </h1>
 
         <p>
-          FactChecker combines intelligent analysis,
-          source verification and clear explanations
-          to help you make better decisions online.
+          Evidence-based factual verification is not implemented. Dataset
+          classification, where present, must not be interpreted as a truth verdict.
         </p>
 
       </section>
@@ -166,12 +165,12 @@ function FeaturesPage({
         <div>
 
           <span>
-            READY TO VERIFY?
+            PROTOTYPE STATUS
           </span>
 
           <h2>
-            Start checking information
-            with confidence.
+            No evidence-based verdicts
+            are currently available.
           </h2>
 
         </div>

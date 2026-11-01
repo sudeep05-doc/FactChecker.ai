@@ -1,10 +1,16 @@
+const dns = require("dns");
+
+dns.setServers([
+  "8.8.8.8",
+  "1.1.1.1"
+]);
+
 const path = require("path");
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
-const mongoose = require("mongoose");
 
 dotenv.config({ path: path.join(__dirname, ".env") });
 
@@ -26,10 +32,11 @@ const PORT = process.env.PORT || 5000;
 
 app.use(helmet());
 
-const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const allowedOrigins = [
+  process.env.CLIENT_URL || "http://localhost:5173",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+];
 
 app.use(
   cors({
@@ -61,8 +68,7 @@ app.use(
 );
 
 app.get("/api/health", (req, res) => {
-  const database = mongoose.connection.readyState === 1 ? "connected" : "disconnected";
-  return success(res, { database }, "VerifyAI backend is running");
+  return success(res, {}, "VerifyAI backend is running");
 });
 
 app.use("/api/auth", authRoutes);

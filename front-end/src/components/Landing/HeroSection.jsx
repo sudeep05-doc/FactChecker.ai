@@ -13,21 +13,20 @@ const HeroSection = ({
       <div className="hero-copy reveal">
 
         <span className="eyebrow">
-          <i>✦</i> AI POWERED
+          <i>✦</i> RESEARCH PROTOTYPE
         </span>
 
 
         <h1>
-          Detect <span>Fake News.</span>
+          Examine <span>News Claims.</span>
           <br />
-          Trust <strong>Real News.</strong>
+          Require <strong>Evidence.</strong>
         </h1>
 
 
         <p>
-          Our advanced AI analyzes news content in seconds
-          and helps you identify misinformation, so you can
-          stay informed with confidence.
+          Evidence-based factual verification is not implemented yet. This
+          prototype does not determine whether submitted claims are true or false.
         </p>
 
 
@@ -195,7 +194,7 @@ const HeroSection = ({
         <div className="result-card floating-card">
 
           <small>
-            AI Analysis Result
+            STATIC MOCKUP — NOT AN ANALYSIS RESULT
           </small>
 
 
@@ -204,11 +203,11 @@ const HeroSection = ({
             <div
               className="progress-ring"
               style={{
-                "--p": 92,
+                "--p": 0,
               }}
             >
               <b>
-                92%
+                N/A
               </b>
             </div>
 
@@ -216,18 +215,17 @@ const HeroSection = ({
             <div>
 
               <h3>
-                Real News
+                Verification unavailable
               </h3>
 
 
               <p>
-                This news is highly likely to be
-                real and credible.
+                No evidence-based verdict or confidence score is generated.
               </p>
 
 
               <span className="confidence">
-                High Confidence
+                No score
               </span>
 
             </div>
@@ -242,7 +240,7 @@ const HeroSection = ({
         <div className="factor-card floating-card">
 
           <b>
-            Analysis Factors
+            Illustrative values only — not measured factors
           </b>
 
 

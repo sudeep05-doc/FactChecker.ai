@@ -1,6 +1,4 @@
 const Report = require("../models/Report");
-const Verification = require("../models/Verification");
-const mongoose = require("mongoose");
 const { success, error } = require("../utils/apiResponse");
 
 const createReport = async (req, res, next) => {
@@ -9,15 +7,6 @@ const createReport = async (req, res, next) => {
 
     if (!reason || !String(reason).trim()) {
       return error(res, "Please provide a report reason.", 400);
-    }
-
-    if (verification) {
-      if (!mongoose.isValidObjectId(verification)) {
-        return error(res, "Invalid verification reference.", 400);
-      }
-
-      const record = await Verification.findOne({ _id: verification, user: req.user._id });
-      if (!record) return error(res, "Verification not found.", 404);
     }
 
     const report = await Report.create({

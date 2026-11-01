@@ -6,9 +6,9 @@ const initialNotifications = [
     id: 1,
     type: "warning",
     category: "system",
-    title: "Possible misinformation detected in a viral article.",
+    title: "Sample notice — no claim was evaluated.",
     message:
-      "Article from source [Unknown.news] has multiple misleading claims. Check the article before sharing.",
+      "This placeholder notification is not based on a real content analysis.",
     time: "1h ago",
     unread: true,
     action: "Analyze Now",
@@ -18,9 +18,9 @@ const initialNotifications = [
     id: 2,
     type: "success",
     category: "system",
-    title: "Platform Update complete.",
+    title: "Evidence verification is not implemented.",
     message:
-      "We've updated our fact-checking algorithms. Explore the latest verification features.",
+      "The prototype does not produce evidence-backed factual verdicts or confidence scores.",
     time: "3h ago",
     unread: true,
     action: "Explore Features",

@@ -1,5 +1,4 @@
 import { useContext, useState } from "react";
-
 import Sidebar from "../components/Dashboard/Sidebar";
 import Header from "../components/Dashboard/Header";
 import DashboardHome from "../components/Dashboard/DashboardHome";
@@ -8,9 +7,13 @@ import History from "../components/Dashboard/History";
 import Profile from "../components/Dashboard/Profile";
 import Settings from "../components/Dashboard/Settings";
 import TrendingNews from "../components/Dashboard/TrendingNews";
+import Feedback from "../components/Dashboard/Feedback";
 
 import { AppContext } from "../context/AppContext";
-import { analyzeWithDelay } from "../utils/prediction";
+import {
+  createUnavailableVerification,
+  getPredictionPresentation,
+} from "../utils/prediction";
 
 
 /* =========================================================
@@ -21,9 +24,9 @@ const initialNotifications = [
   {
     id: 1,
     type: "warning",
-    title: "Possible misinformation detected in a viral article.",
+    title: "Sample notice — no claim was evaluated.",
     description:
-      "An article from an unknown source contains multiple misleading claims. Check the article before sharing.",
+      "This placeholder notification is not based on a real content analysis.",
     time: "1h ago",
     action: "Analyze Now",
     unread: true,
@@ -31,9 +34,9 @@ const initialNotifications = [
   {
     id: 2,
     type: "system",
-    title: "Platform Update complete.",
+    title: "Evidence verification is not implemented.",
     description:
-      "We've updated our fact-checking algorithms. Explore the latest verification features.",
+      "The prototype does not produce evidence-backed factual verdicts or confidence scores.",
     time: "3h ago",
     action: "Explore Features",
     unread: true,
@@ -556,46 +559,38 @@ const VerificationResultPanel = ({
   result,
   setActiveView,
 }) => {
-
+  const presentation = getPredictionPresentation(result);
+  const isDatasetClassification =
+    presentation.kind === "dataset_classification";
+  const isEvidenceEvaluated =
+    presentation.kind === "evidence_verdict";
+  const isUnavailable = !isDatasetClassification && !isEvidenceEvaluated;
+  const datasetPrediction =
+    result?.datasetPrediction ?? result?.dataset_prediction;
+  const datasetIdentity =
+    result?.datasetIdentity ?? result?.dataset_identity;
+  const mockStatus = result?.isMock ?? result?.is_mock;
   const isFake =
-    result?.label === "Fake News" ||
-    result?.label === "Likely Fake";
-
-
-  const confidence =
-    Number(result?.confidence) || 91;
-
-
-  const verdict =
-    isFake
-      ? "Likely Fake"
-      : "Likely Authentic";
-
-
+    result?.verdict === "REFUTED" ||
+    ["FAKE", "Fake News"].includes(datasetPrediction);
+  const isPositive =
+    result?.verdict === "SUPPORTED" ||
+    ["REAL", "Real News"].includes(datasetPrediction);
+  const resultTone = isUnavailable || isDatasetClassification
+    ? ""
+    : isFake
+      ? "fake"
+      : isPositive
+        ? "real"
+        : "";
+  const confidence = presentation.score;
+  const verdict = presentation.title;
   const explanation =
     result?.explanation ||
-    (
-      isFake
-        ? "The submitted content contains several signals commonly associated with misleading or unreliable information."
-        : "The submitted content contains credibility signals that are consistent with reliable reporting."
-    );
-
-
-  const reasoning = [
-    isFake
-      ? "Suspicious wording and misinformation patterns were detected."
-      : "The writing pattern appears consistent with credible reporting.",
-
-    result?.trustedSource
-      ? "The submitted source matches a recognized trusted domain."
-      : "Source credibility requires additional verification.",
-
-    isFake
-      ? "The claim may require additional evidence before being shared."
-      : "No major credibility inconsistencies were detected.",
-
-    "AI verification is an assistance tool and should be combined with human fact-checking.",
-  ];
+    "Evidence-based factual verification is not implemented. No verdict or confidence score was produced.";
+  const reasoning = Array.isArray(result?.reasoning)
+    ? result.reasoning
+    : [];
 
 
   return (
@@ -1068,11 +1063,15 @@ const VerificationResultPanel = ({
       </span>
 
       <h1 className="result-page-title">
-        Verification Result
+        {presentation.title}
       </h1>
 
       <p className="result-page-subtitle">
-        Review the assessment generated for your submitted content.
+        {isDatasetClassification
+          ? "This is a dataset-label prediction, not an evidence-based factual verdict."
+          : isEvidenceEvaluated
+            ? "Review the verdict and its evaluated evidence."
+            : "No factual verdict is available because evidence-based verification is not implemented."}
       </p>
 
 
@@ -1084,10 +1083,14 @@ const VerificationResultPanel = ({
 
           <div
             className={`result-verdict-icon ${
-              isFake ? "fake" : "real"
+              resultTone
             }`}
           >
-            {isFake ? "!" : "✓"}
+            {isUnavailable || isDatasetClassification || (!isFake && !isPositive)
+              ? "?"
+              : isFake
+                ? "!"
+                : "✓"}
           </div>
 
           <div>
@@ -1102,12 +1105,14 @@ const VerificationResultPanel = ({
 
             <span
               className={`result-status ${
-                isFake ? "fake" : "real"
+                resultTone
               }`}
             >
-              {isFake
-                ? "Misinformation signals detected"
-                : "Credibility signals detected"}
+              {isDatasetClassification
+                ? `Dataset: ${datasetIdentity || "unspecified"}; not a factual verdict`
+                : isEvidenceEvaluated
+                  ? "Verdict based on evaluated evidence"
+                  : "Evidence evaluation is not implemented"}
             </span>
 
           </div>
@@ -1115,19 +1120,18 @@ const VerificationResultPanel = ({
         </div>
 
 
-        <div className="result-confidence-area">
+        {confidence !== null && Number.isFinite(confidence) ? (
+          <div className="result-confidence-area">
 
           <div className="confidence-top">
-            <span>Confidence</span>
+            <span>{presentation.scoreLabel}</span>
             <strong>{confidence}%</strong>
           </div>
 
           <div className="confidence-track">
 
             <div
-              className={`confidence-progress ${
-                isFake ? "fake" : "real"
-              }`}
+              className={`confidence-progress ${resultTone}`}
               style={{
                 width: `${confidence}%`,
               }}
@@ -1136,15 +1140,28 @@ const VerificationResultPanel = ({
           </div>
 
           <span className="confidence-note">
-            AI assessment confidence
+            {presentation.scoreSemantics === "uncalibrated_dataset_score"
+              ? "Uncalibrated dataset score; not factual confidence"
+              : "Calibrated class probability; not factual confidence"}
           </span>
 
-        </div>
+          </div>
+        ) : (
+          <div className="result-confidence-area">
+            <div className="confidence-top">
+              <span>Confidence</span>
+              <strong>Not available</strong>
+            </div>
+            <span className="confidence-note">
+              No factual confidence score is produced.
+            </span>
+          </div>
+        )}
 
       </div>
 
 
-      {/* AI EXPLANATION */}
+      {/* EXPLANATION */}
 
       <div className="result-info-card">
 
@@ -1155,11 +1172,15 @@ const VerificationResultPanel = ({
         <div>
 
           <h3>
-            AI Explanation
+            {isDatasetClassification
+              ? "Dataset-Label Scope"
+              : "Verification Status"}
           </h3>
 
           <p>
-            {explanation}
+            {isDatasetClassification
+              ? "This output predicts a Fakeddit dataset label only. It does not assess whether any claim is true or false."
+              : explanation}
           </p>
 
         </div>
@@ -1183,7 +1204,7 @@ const VerificationResultPanel = ({
 
           <div className="reasoning-list">
 
-            {reasoning.map(
+            {reasoning.length > 0 ? reasoning.map(
               (item, index) => (
 
                 <div
@@ -1202,6 +1223,12 @@ const VerificationResultPanel = ({
                 </div>
 
               )
+            ) : (
+              <p>
+                {isDatasetClassification
+                  ? "This output is limited to the dataset label and does not evaluate factual support."
+                  : "No evidence was evaluated, so no evidence-based reasoning is available."}
+              </p>
             )}
 
           </div>
@@ -1233,7 +1260,7 @@ const VerificationResultPanel = ({
 
           <strong>
             {result?.processingTime ||
-              "1.8 seconds"}
+              "Not run"}
           </strong>
         </div>
 
@@ -1242,17 +1269,51 @@ const VerificationResultPanel = ({
 
           <strong>
             {result?.reportId ||
-              `VA-${Date.now()
-                .toString()
-                .slice(-8)}`}
+              "Not generated"}
           </strong>
         </div>
 
         <div className="detail-row">
-          <span>Status</span>
+          <span>Request status</span>
 
-          <strong className="completed">
-            Completed
+          <strong>
+            {result?.status || "unavailable"}
+          </strong>
+        </div>
+
+        <div className="detail-row">
+          <span>Evidence status</span>
+
+          <strong>
+            {result?.evidenceStatus || "not available"}
+          </strong>
+        </div>
+
+        <div className="detail-row">
+          <span>Prediction type</span>
+
+          <strong>
+            {result?.predictionType ||
+              result?.prediction_type ||
+              "legacy_unverified"}
+          </strong>
+        </div>
+
+        <div className="detail-row">
+          <span>Mock response</span>
+
+          <strong>
+            {mockStatus == null ? "Unknown" : mockStatus ? "Yes" : "No"}
+          </strong>
+        </div>
+
+        <div className="detail-row">
+          <span>Model / dataset</span>
+
+          <strong>
+            {result?.modelIdentity ||
+              datasetIdentity ||
+              "Not applicable"}
           </strong>
         </div>
 
@@ -1274,11 +1335,14 @@ const VerificationResultPanel = ({
 
         <button
           className="result-action secondary"
+          disabled={isUnavailable}
           onClick={() => {
             window.print();
           }}
         >
-          ↓ Download Report
+          {isUnavailable
+            ? "Report unavailable"
+            : "↓ Download Report"}
         </button>
 
       </div>
@@ -1347,206 +1411,20 @@ const DashboardPage = ({
      AI ANALYSIS
   ======================================================= */
 
-  const handleAnalyze = async ({
+  const handleAnalyze = ({
     type,
     content,
     file,
   }) => {
+    const newResult = createUnavailableVerification({
+      type,
+      content,
+      fileName: file?.name || "",
+    });
 
-    const startTime =
-      performance.now();
-
-
-    let text = "";
-    let url = "";
-
-
-    if (type === "text") {
-      text = content || "";
-    }
-
-
-    if (
-      type === "website" ||
-      type === "youtube"
-    ) {
-      url = content || "";
-    }
-
-
-    if (
-      type === "image" ||
-      type === "pdf" ||
-      type === "video"
-    ) {
-      text =
-        file?.name ||
-        content ||
-        "";
-    }
-
-
-    try {
-
-      const prediction =
-        await analyzeWithDelay({
-          text,
-          url,
-        });
-
-
-      const processingTime =
-        (
-          (performance.now() -
-            startTime) /
-          1000
-        ).toFixed(1);
-
-
-      const isFake =
-        prediction?.label ===
-        "Fake News";
-
-
-      const newResult = {
-
-        ...prediction,
-
-        id: Date.now(),
-
-        contentType: type,
-
-        inputContent:
-          content || "",
-
-        fileName:
-          file?.name || "",
-
-        reportId:
-          `VA-${Date.now()
-            .toString()
-            .slice(-8)}`,
-
-        processingTime:
-          `${processingTime} seconds`,
-
-        time:
-          new Date().toLocaleString(),
-
-        explanation:
-          prediction?.explanation ||
-          (
-            isFake
-              ? "The submitted content contains several signals that may indicate misleading information."
-              : "The submitted content contains credibility signals consistent with reliable information."
-          ),
-
-        reasoning: [
-          isFake
-            ? "Suspicious wording and misinformation signals were detected."
-            : "The writing pattern appears consistent with credible reporting.",
-
-          prediction?.trustedSource
-            ? "The submitted source matches a recognized trusted domain."
-            : "The source requires additional verification.",
-
-          isFake
-            ? "The claim may require additional evidence before being shared."
-            : "No major credibility inconsistencies were detected.",
-
-          "AI analysis evaluates multiple content signals before producing the assessment.",
-        ],
-      };
-
-
-      setResult(newResult);
-
-
-      /* SAVE TO HISTORY */
-
-      const historyItem = {
-
-        id:
-          newResult.id,
-
-        text:
-          content?.length > 120
-            ? content.substring(0, 120) +
-              "..."
-            : content ||
-              file?.name ||
-              "Content analyzed",
-
-        label:
-          prediction?.label ||
-          "Unknown",
-
-        confidence:
-          prediction?.confidence ||
-          0,
-
-        time:
-          newResult.time,
-      };
-
-
-      setHistory((prev) => [
-        historyItem,
-        ...prev,
-      ]);
-
-
-      /* OPEN RESULT PAGE */
-
-      setActiveView("result");
-
-    } catch (error) {
-
-      console.error(
-        "Verification failed:",
-        error
-      );
-
-      /* DEMO RESULT IF AI REQUEST FAILS */
-
-      const demoResult = {
-
-        id: Date.now(),
-
-        label: "Likely Fake",
-
-        confidence: 91,
-
-        contentType: type,
-
-        processingTime: "1.8 seconds",
-
-        reportId:
-          `VA-${Date.now()
-            .toString()
-            .slice(-8)}`,
-
-        explanation:
-          "Demo verification completed. The submitted content contains several signals that require additional fact-checking.",
-
-        trustedSource: false,
-
-        reasoning: [
-          "Suspicious wording was detected.",
-          "Source credibility requires additional verification.",
-          "The claim contains patterns commonly associated with misleading information.",
-          "Additional evidence is recommended before sharing.",
-        ],
-
-        time:
-          new Date().toLocaleString(),
-      };
-
-
-      setResult(demoResult);
-
-      setActiveView("result");
-    }
+    setResult(newResult);
+    setHistory((prev) => [newResult, ...prev]);
+    setActiveView("result");
   };
 
 
@@ -1618,28 +1496,24 @@ const DashboardPage = ({
         );
 
 
-      /* HISTORY */
 
       case "history":
 
         return <History />;
 
-
-      /* PROFILE */
-
       case "profile":
 
-        return <Profile />;
+  return <Profile />;
 
 
-      /* SETTINGS */
+case "feedback":
 
-      case "settings":
-
-        return <Settings />;
+  return <Feedback />;
 
 
-      /* TRENDING NEWS */
+case "settings":
+
+  return <Settings />;
 
       case "trending":
 
@@ -1690,19 +1564,19 @@ const DashboardPage = ({
           history?.length || 0;
 
 
-        const fake =
+        const datasetLabels =
           history?.filter(
             (item) =>
-              item.label ===
-              "Fake News"
+              item.predictionType === "dataset_classification"
           ).length || 0;
 
-
-        const real =
-          Math.max(
-            total - fake,
-            0
-          );
+        const evidenceVerdicts =
+          history?.filter(
+            (item) =>
+              item.predictionType === "evidence_verification" &&
+              item.evidenceStatus === "evaluated" &&
+              Boolean(item.verdict)
+          ).length || 0;
 
 
         return (
@@ -1733,29 +1607,29 @@ const DashboardPage = ({
                 </strong>
 
                 <span>
-                  Total Analyses
+                  Saved Records
                 </span>
               </div>
 
 
               <div>
                 <strong>
-                  {real}
+                  {datasetLabels}
                 </strong>
 
                 <span>
-                  Credible
+                  Dataset-Label Predictions
                 </span>
               </div>
 
 
               <div>
                 <strong>
-                  {fake}
+                  {evidenceVerdicts}
                 </strong>
 
                 <span>
-                  Fake News
+                  Evaluated Evidence Verdicts
                 </span>
               </div>
 

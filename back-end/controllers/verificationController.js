@@ -1,6 +1,4 @@
 const Verification = require("../models/Verification");
-const Report = require("../models/Report");
-const Feedback = require("../models/Feedback");
 const { verifyContent } = require("../services/verificationService");
 const { success, error } = require("../utils/apiResponse");
 
@@ -38,7 +36,7 @@ const runVerification = async (req, res, next) => {
       return success(res, {
         ...result,
         id: Date.now(),
-      }, "Verification completed.");
+      }, "Factual verification is unavailable.");
     }
 
     const record = await Verification.create({
@@ -51,6 +49,18 @@ const runVerification = async (req, res, next) => {
       storedFileName: file ? file.filename : "",
       label: result.label,
       confidence: result.confidence,
+      predictionType: result.predictionType,
+      datasetPrediction: result.datasetPrediction,
+      datasetScore: result.datasetScore,
+      classScores: result.classScores,
+      modelIdentity: result.modelIdentity,
+      datasetIdentity: result.datasetIdentity,
+      confidenceSemantics: result.confidenceSemantics,
+      isMock: result.isMock,
+      evidenceStatus: result.evidenceStatus,
+      explanationProvenance: result.explanationProvenance,
+      status: result.status,
+      verdict: result.verdict,
       fakeScore: result.fakeScore,
       trustedSource: result.trustedSource,
       explanation: result.explanation,
@@ -65,7 +75,7 @@ const runVerification = async (req, res, next) => {
     return success(
       res,
       record.toResultJSON(),
-      "Verification completed."
+      "Factual verification is unavailable."
     );
   } catch (err) {
     next(err);
@@ -115,11 +125,6 @@ const deleteVerification = async (req, res, next) => {
       return error(res, "Verification not found.", 404);
     }
 
-    await Promise.all([
-      Report.deleteMany({ verification: record._id }),
-      Feedback.deleteMany({ verification: record._id }),
-    ]);
-
     return success(res, {}, "Verification deleted.");
   } catch (err) {
     next(err);
@@ -128,14 +133,7 @@ const deleteVerification = async (req, res, next) => {
 
 const clearHistory = async (req, res, next) => {
   try {
-    const records = await Verification.find({ user: req.user._id }).select("_id");
-    const verificationIds = records.map((record) => record._id);
-
-    await Promise.all([
-      Verification.deleteMany({ _id: { $in: verificationIds } }),
-      Report.deleteMany({ verification: { $in: verificationIds } }),
-      Feedback.deleteMany({ verification: { $in: verificationIds } }),
-    ]);
+    await Verification.deleteMany({ user: req.user._id });
     return success(res, {}, "History cleared.");
   } catch (err) {
     next(err);

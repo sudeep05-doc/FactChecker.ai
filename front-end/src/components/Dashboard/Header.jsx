@@ -129,16 +129,6 @@ const Header = ({
 
       <div className="header-left">
 
-        <button
-          type="button"
-          className="back-home-btn"
-          onClick={backHome}
-          title="Back to Home"
-        >
-          ← Home
-        </button>
-
-
         <div className="header-title-area">
 
           <h1>

@@ -1,11 +1,11 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useState } from "react";
 import { AppContext } from "../../context/AppContext";
 import "./DashboardOverview.css";
 
 const formatNumber = (value) =>
   Number(value || 0).toLocaleString("en-IN");
 
-const topicRows = [
+const sampleTopicRows = [
   {
     id: "P001",
     category: "Political Coercion",
@@ -97,32 +97,21 @@ export default function DashboardOverview({
   const [selectedPoint, setSelectedPoint] =
     useState(3);
 
-  const totalAnalyzed =
-    history?.length || 0;
-
-  const fakeCount =
+  const totalRecords = history?.length || 0;
+  const countDatasetLabels = (label) =>
     history?.filter(
-      (item) => item.label === "Fake News"
+      (item) =>
+        item.predictionType === "dataset_classification" &&
+        String(item.datasetIdentity || "").toLowerCase().startsWith("fakeddit") &&
+        String(item.datasetPrediction || "").toUpperCase() === label
     ).length || 0;
-
-  const metrics = useMemo(
-    () => ({
-      scanned: Math.max(
-        45670,
-        totalAnalyzed + 45670
-      ),
-
-      fake: Math.max(
-        2341,
-        fakeCount + 2341
-      ),
-
-      credibility: 78.4,
-
-      topics: 15,
-    }),
-    [totalAnalyzed, fakeCount]
-  );
+  const evaluatedEvidenceCount =
+    history?.filter(
+      (item) =>
+        item.predictionType === "evidence_verification" &&
+        item.evidenceStatus === "evaluated" &&
+        Boolean(item.verdict)
+    ).length || 0;
 
   const selectedData =
     chartPoints[selectedPoint];
@@ -147,9 +136,8 @@ export default function DashboardOverview({
           </h1>
 
           <p>
-            Monitor credibility trends,
-            misinformation signals and
-            emerging topics.
+            Review saved records and research outputs. Evidence-based factual
+            verification is not currently implemented.
           </p>
 
         </div>
@@ -190,21 +178,15 @@ export default function DashboardOverview({
           <div>
 
             <span>
-              Total Scanned Articles
+              Saved Analysis Records
             </span>
 
             <strong>
-              {formatNumber(
-                metrics.scanned
-              )}
+              {formatNumber(totalRecords)}
             </strong>
 
             <small>
-              2 More Then in Yesterday
-
-              <b>
-                ↗ 12.5%
-              </b>
+              Includes unverified legacy records
             </small>
 
           </div>
@@ -223,21 +205,15 @@ export default function DashboardOverview({
           <div>
 
             <span>
-              Likely Fake News
+              Fakeddit FAKE Labels
             </span>
 
             <strong>
-              {formatNumber(
-                metrics.fake
-              )}
+              {formatNumber(countDatasetLabels("FAKE"))}
             </strong>
 
             <small>
-              1 More Then in Yesterday
-
-              <b>
-                ↘ 2,341
-              </b>
+              Dataset-label prediction only
             </small>
 
           </div>
@@ -257,15 +233,15 @@ export default function DashboardOverview({
           <div>
 
             <span>
-              Source Credibility Index
+              Evidence Verdicts
             </span>
 
             <strong>
-              {metrics.credibility}
+              {formatNumber(evaluatedEvidenceCount)}
             </strong>
 
             <small>
-              Color Ceeoibility
+              No evidence evaluations are currently implemented
             </small>
 
           </div>
@@ -274,7 +250,7 @@ export default function DashboardOverview({
           <div
             className="mini-gauge"
             style={{
-              "--gauge": "78.4%",
+              "--gauge": "0%",
             }}
           >
 
@@ -300,19 +276,15 @@ export default function DashboardOverview({
           <div>
 
             <span>
-              Top Misleading Topics
+              Fakeddit REAL Labels
             </span>
 
             <strong>
-              {metrics.topics} topics
+              {formatNumber(countDatasetLabels("REAL"))}
             </strong>
 
             <small>
-              1 More Then in Yesterday
-
-              <b>
-                ↗ 15.5%
-              </b>
+              Dataset-label prediction only
             </small>
 
           </div>
@@ -345,8 +317,11 @@ export default function DashboardOverview({
             <div>
 
               <h2>
-                News Credibility Trends
+                Illustrative Trend Sample
               </h2>
+              <small>
+                Demo values only; not live project results or factual-verification metrics.
+              </small>
 
             </div>
 
@@ -374,7 +349,7 @@ export default function DashboardOverview({
 
               <i className="legend-real" />
 
-              Credible Articles
+              Illustrative series A
 
             </span>
 
@@ -382,7 +357,7 @@ export default function DashboardOverview({
 
               <i className="legend-fake" />
 
-              Suspected Fake News
+              Illustrative series B
 
             </span>
 
@@ -808,7 +783,7 @@ export default function DashboardOverview({
           <div className="overview-panel-header">
 
             <h2>
-              Emerging Misinformation Themes
+              Illustrative Sample Themes
             </h2>
 
             <select
@@ -864,7 +839,7 @@ export default function DashboardOverview({
                   </th>
 
                   <th>
-                    Credibility Score
+                    Illustrative Score (Not Measured)
                   </th>
 
                   <th>
@@ -878,7 +853,7 @@ export default function DashboardOverview({
 
               <tbody>
 
-                {topicRows.map(
+                {sampleTopicRows.map(
                   (row) => (
 
                     <tr key={row.id}>
@@ -929,6 +904,9 @@ export default function DashboardOverview({
             </table>
 
           </div>
+          <small>
+            Sample rows are illustrative and are not project predictions, evidence verdicts, or measured credibility scores.
+          </small>
 
         </article>
 

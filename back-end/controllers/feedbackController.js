@@ -1,36 +1,53 @@
 const Feedback = require("../models/Feedback");
-const Verification = require("../models/Verification");
-const mongoose = require("mongoose");
 const { success, error } = require("../utils/apiResponse");
 
 const createFeedback = async (req, res, next) => {
   try {
-    const { helpful, comment, verification } = req.body;
-
-    if (typeof helpful !== "boolean") {
-      return error(res, "Please indicate whether the result was helpful.", 400);
+    // Feedback must come from a logged-in user
+    if (!req.user) {
+      return error(res, "Please log in to submit feedback.", 401);
     }
 
-    if (verification) {
-      if (!mongoose.isValidObjectId(verification)) {
-        return error(res, "Invalid verification reference.", 400);
-      }
+    const { rating, message } = req.body;
 
-      // Authenticated users may only attach feedback to their own history.
-      if (req.user) {
-        const record = await Verification.findOne({ _id: verification, user: req.user._id });
-        if (!record) return error(res, "Verification not found.", 404);
-      }
+    // Validate rating
+    const numericRating = Number(rating);
+
+    if (
+      !Number.isInteger(numericRating) ||
+      numericRating < 1 ||
+      numericRating > 5
+    ) {
+      return error(res, "Please select a rating from 1 to 5.", 400);
     }
 
-    const feedback = await Feedback.create({
-      user: req.user?._id || null,
-      verification: verification || null,
-      helpful,
-      comment: comment || "",
-    });
+    // Validate message
+    if (!message || !message.trim()) {
+      return error(res, "Please enter your feedback.", 400);
+    }
 
-    return success(res, feedback, "Feedback saved.", 201);
+    // Create or update the user's feedback
+    const feedback = await Feedback.findOneAndUpdate(
+      { user: req.user._id },
+      {
+        user: req.user._id,
+        email: req.user.email,
+        rating: numericRating,
+        message: message.trim(),
+      },
+      {
+        new: true,
+        upsert: true,
+        runValidators: true,
+        setDefaultsOnInsert: true,
+      }
+    );
+
+    return success(
+      res,
+      feedback,
+      "Feedback submitted successfully."
+    );
   } catch (err) {
     next(err);
   }
@@ -38,11 +55,15 @@ const createFeedback = async (req, res, next) => {
 
 const listFeedback = async (req, res, next) => {
   try {
-    const items = await Feedback.find({ user: req.user._id }).sort({
-      createdAt: -1,
-    });
+    if (!req.user) {
+      return error(res, "Please log in to view feedback.", 401);
+    }
 
-    return success(res, items);
+    const feedback = await Feedback.findOne({
+  user: req.user._id,
+}).populate("user", "email");
+
+    return success(res, feedback);
   } catch (err) {
     next(err);
   }

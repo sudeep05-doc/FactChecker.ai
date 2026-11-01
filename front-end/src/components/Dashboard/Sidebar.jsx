@@ -46,6 +46,11 @@ const Sidebar = ({
       title: "Student Profile",
     },
     {
+  id: "feedback",
+  icon: "♡",
+  title: "Feedback",
+},
+    {
       id: "settings",
       icon: "⚙",
       title: "Settings",

@@ -1,20 +1,19 @@
 import jsPDF from "jspdf";
 
 export function generateVerificationPDF({
-  verdict = "AUTHENTIC",
-  confidence = 98,
-  contentType = "Text Analysis",
-  reportId = `VA-${Date.now()}`,
-  analysisSummary = "The submitted content appears consistent with verified information.",
-  reasoning = [
-    "Content patterns are consistent with known samples.",
-    "No significant inconsistencies were detected.",
-    "Contextual information appears consistent with available evidence.",
-    "Language and structure appear natural."
-  ],
-  recommendation = "The content is considered likely authentic based on the available analysis.",
-  processingTime = "1.2 seconds",
+  verdict,
+  confidence = null,
+  contentType,
+  reportId,
+  analysisSummary,
+  reasoning = [],
+  recommendation,
+  processingTime,
 }) {
+  if (!verdict || !analysisSummary) {
+    throw new Error("A verified verdict and its explanation are required.");
+  }
+
   const pdf = new jsPDF("p", "mm", "a4");
 
   const pageWidth = 210;
@@ -24,9 +23,14 @@ export function generateVerificationPDF({
   const blue = [25, 119, 210];
   const dark = [25, 35, 50];
   const green = [43, 165, 91];
+  const red = [190, 55, 55];
+  const gray = [105, 115, 128];
+  const verdictColor =
+    verdict === "REFUTED" ? red : verdict === "SUPPORTED" ? green : gray;
+  const verdictIcon =
+    verdict === "REFUTED" ? "×" : verdict === "SUPPORTED" ? "✓" : "?";
   const lightBlue = [235, 246, 255];
   const border = [190, 205, 220];
-  const gray = [105, 115, 128];
 
   let y = 15;
 
@@ -62,7 +66,7 @@ export function generateVerificationPDF({
   pdf.setFontSize(16);
 
   pdf.text(
-    "AI Verification Report",
+    "Evidence Verification Report",
     62,
     y + 5
   );
@@ -159,13 +163,13 @@ export function generateVerificationPDF({
   pdf.setFont("helvetica", "normal");
 
   pdf.text(
-    "AI Content Verification",
+    "Evidence-based factual verification",
     margin + 78,
     y + 14
   );
 
   pdf.text(
-    "Authenticity & Confidence",
+    "Evidence verdict",
     margin + 78,
     y + 20
   );
@@ -213,7 +217,7 @@ export function generateVerificationPDF({
 
   /* Verdict */
 
-  pdf.setDrawColor(...green);
+  pdf.setDrawColor(...verdictColor);
   pdf.setLineWidth(1.5);
 
   pdf.circle(
@@ -223,12 +227,12 @@ export function generateVerificationPDF({
     "S"
   );
 
-  pdf.setTextColor(...green);
+  pdf.setTextColor(...verdictColor);
   pdf.setFontSize(14);
   pdf.setFont("helvetica", "bold");
 
   pdf.text(
-    "✓",
+    verdictIcon,
     margin + 10.5,
     y + 19.5
   );
@@ -251,50 +255,19 @@ export function generateVerificationPDF({
     y + 21
   );
 
-  /* Confidence */
-
-  pdf.setTextColor(...dark);
-  pdf.setFontSize(8);
-
-  pdf.text(
-    "CONFIDENCE SCORE",
-    margin + 125,
-    y + 10
-  );
-
-  pdf.setFontSize(17);
-
-  pdf.text(
-    `${confidence}%`,
-    margin + 125,
-    y + 21
-  );
-
-  /* Confidence bar */
-
-  pdf.setFillColor(225, 230, 235);
-
-  pdf.roundedRect(
-    margin + 153,
-    y + 14,
-    35,
-    5,
-    2,
-    2,
-    "F"
-  );
-
-  pdf.setFillColor(...green);
-
-  pdf.roundedRect(
-    margin + 153,
-    y + 14,
-    35 * (confidence / 100),
-    5,
-    2,
-    2,
-    "F"
-  );
+  if (confidence != null) {
+    pdf.setTextColor(...dark);
+    pdf.setFontSize(8);
+    pdf.text("Class probability (not factual confidence)", margin + 125, y + 10);
+    pdf.setFontSize(17);
+    pdf.text(`${Math.round(confidence * 100)}%`, margin + 125, y + 21);
+  } else {
+    pdf.setTextColor(...dark);
+    pdf.setFontSize(8);
+    pdf.text("Confidence", margin + 125, y + 10);
+    pdf.setFontSize(12);
+    pdf.text("Not available", margin + 125, y + 21);
+  }
 
   y += 42;
 
@@ -318,7 +291,7 @@ export function generateVerificationPDF({
   pdf.setFontSize(11);
 
   pdf.text(
-    "AI ANALYSIS SUMMARY",
+    "EVIDENCE-BASED EXPLANATION",
     margin + 4,
     y + 5.5
   );
@@ -415,7 +388,7 @@ export function generateVerificationPDF({
   pdf.setFont("helvetica", "bold");
 
   pdf.text(
-    "AI RECOMMENDATION",
+    "RECOMMENDATION",
     margin,
     y
   );
@@ -510,7 +483,7 @@ export function generateVerificationPDF({
   pdf.setFontSize(7);
 
   pdf.text(
-    "VeriAI AI Verification Services",
+    "FactChecker.ai Evidence Verification",
     margin,
     footerY
   );

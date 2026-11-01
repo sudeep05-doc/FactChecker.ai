@@ -12,45 +12,45 @@ function LearnMorePage({
     {
       icon: "▤",
       title: "Submit News",
-      text: "Paste the news article or content you want to verify.",
+      text: "Submit supported content to the research prototype.",
     },
     {
       icon: "AI",
-      title: "AI Analysis",
-      text: "Our AI analyzes the content using multiple advanced algorithms.",
+      title: "Verification Status",
+      text: "Evidence-based factual verification is not implemented.",
     },
     {
       icon: "▥",
-      title: "Get Results",
-      text: "Receive real-time results with confidence score and analysis factors.",
+      title: "Unavailable Response",
+      text: "No factual verdict or confidence score is generated.",
     },
     {
       icon: "♢",
-      title: "Stay Informed",
-      text: "Make informed decisions and trust only verified information.",
+      title: "Research Scope",
+      text: "Fakeddit dataset labels are not independently verified truth labels.",
     },
   ];
 
   const features = [
     {
       icon: "✦",
-      title: "AI-Powered Detection",
-      text: "State-of-the-art machine learning models trained on millions of data points to detect fake news with high accuracy.",
+      title: "Multimodal Research",
+      text: "The repository contains research components; they are not an end-to-end fact-checking system.",
     },
     {
       icon: "◷",
-      title: "Real-time Analysis",
-      text: "Get instant results in seconds with real-time analysis and continuous data updates from trusted sources.",
+      title: "Evidence Evaluation",
+      text: "Evidence retrieval, claim-evidence assessment, and evidence-backed verdicts are not implemented.",
     },
     {
       icon: "♢",
-      title: "Trusted Sources",
-      text: "We cross-check content with multiple credible sources and trusted databases for accurate verification.",
+      title: "Dataset Classifiers",
+      text: "A dataset-classification score is scoped to its labels and is not factual confidence.",
     },
     {
       icon: "▥",
-      title: "Detailed Reports",
-      text: "Understand why a news is classified as real or fake with detailed analysis factors and confidence scores.",
+      title: "Explanation Boundaries",
+      text: "No explanation or citation is presented as evidence unless it can be traced to evaluated sources.",
     },
   ];
 
@@ -73,7 +73,7 @@ function LearnMorePage({
       role: "Educator",
     },
     {
-      text: "Amazing tool! The AI analysis and confidence scores give me the clarity I need to trust the information I read.",
+      text: "Illustrative testimonial only; it is not evidence of model performance or verification accuracy.",
       name: "Rahul Verma",
       role: "Researcher",
     },
@@ -273,7 +273,7 @@ function LearnMorePage({
               <div className="analysis-head">
 
                 <b>
-                  AI Analysis Result
+                  Illustrative mockup — not a result
                 </b>
 
                 <span>
@@ -287,23 +287,22 @@ function LearnMorePage({
 
                 <div className="score-ring">
                   <strong>
-                    92%
+                    N/A
                   </strong>
                 </div>
 
                 <div>
 
                   <h3>
-                    Real News
+                    Verification unavailable
                   </h3>
 
                   <p>
-                    This news is highly likely
-                    to be real and credible.
+                    Evidence-based factual verification is not implemented.
                   </p>
 
                   <small>
-                    High Confidence
+                    No factual confidence score
                   </small>
 
                 </div>
@@ -500,14 +499,13 @@ function LearnMorePage({
           <div>
 
             <h2>
-              Advanced AI Technology
+              Research Components
             </h2>
 
             <p>
-              FactChecker uses Natural Language Processing
-              (NLP), Machine Learning models, and data from
-              trusted fact-checking organizations to deliver
-              accurate and reliable results.
+              The project explores open-source foundation models and
+              multimodal reasoning. No evidence-backed factual verdict is
+              currently produced.
             </p>
 
 
@@ -519,7 +517,7 @@ function LearnMorePage({
                 "Deep Learning",
                 "Data Mining",
                 "Pattern Recognition",
-                "Fact Verification",
+                "Evidence Verification (not implemented)",
               ].map((tag) => (
 
                 <span key={tag}>
@@ -665,13 +663,11 @@ function LearnMorePage({
           <div>
 
             <h2>
-              Ready to Verify News with Confidence?
+              Evidence-Based Verification Is Not Available Yet
             </h2>
 
             <p>
-              Join thousands of users who trust
-              FactChecker for accurate and reliable
-              news verification.
+              This research prototype does not currently verify factual claims.
             </p>
 
           </div>

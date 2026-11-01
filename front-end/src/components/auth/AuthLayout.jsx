@@ -14,17 +14,17 @@ export default function AuthLayout({ children }) {
           </div>
 
           <h1>
-            Detect.
+            Research.
             <br />
-            Verify.
+            Evaluate.
             <br />
             Stay Informed.
           </h1>
 
           <p>
-            AI-powered verification that helps you separate
+            Evidence-based factual verification is not
             <br />
-            real information from misinformation.
+            implemented in this prototype.
           </p>
         </div>
       </div>
