@@ -138,19 +138,6 @@ export default function TrendingNews({ setActiveView }) {
     };
   }, []);
 
-  // Auto-slide hero every 5 seconds
-  useEffect(() => {
-    if (selectedArticle || filteredNews.length < 2) {
-      return undefined;
-    }
-
-    const interval = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % filteredNews.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [selectedArticle, filteredNews.length]);
-
   // Save to localStorage when state changes
   useEffect(() => {
     localStorage.setItem(
@@ -180,6 +167,19 @@ export default function TrendingNews({ setActiveView }) {
       : newsForTab.filter(
         (item) => item.category === category
       );
+
+  // Auto-slide hero every 5 seconds
+  useEffect(() => {
+    if (selectedArticle || filteredNews.length < 2) {
+      return undefined;
+    }
+
+    const interval = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % filteredNews.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [selectedArticle, filteredNews.length]);
 
   // Get hero article (featured article)
   const heroArticle =
