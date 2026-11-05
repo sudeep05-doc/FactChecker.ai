@@ -2,7 +2,6 @@ import { useContext, useState } from "react";
 import { ThemeContext } from "../../context/ThemeContext";
 
 const Navbar = ({
-  openDashboard,
   openLogin,
   openSignup,
   openFeatures,

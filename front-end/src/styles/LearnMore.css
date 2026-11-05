@@ -1350,10 +1350,6 @@
     display: none;
   }
 
-  .learn-theme {
-    display: none;
-  }
-
   .learn-brand strong {
     font-size: 17px;
   }
@@ -1438,4 +1434,195 @@
   .footer-brand {
     grid-column: 1 / -1;
   }
+}
+
+body.dark-theme .learn-page,
+html[data-theme="dark"] .learn-page {
+  background:
+    radial-gradient(ellipse at 50% 0, rgba(102, 75, 235, 0.1), transparent 38%),
+    #0a1020;
+  color: #eef2ff;
+}
+
+body.dark-theme .learn-nav,
+html[data-theme="dark"] .learn-nav {
+  border-bottom: 1px solid #26324c;
+  background: linear-gradient(135deg, #070d1c, #101a34);
+}
+
+body.dark-theme .learn-brand em,
+html[data-theme="dark"] .learn-brand em {
+  color: #a28cff;
+}
+
+body.dark-theme .learn-nav nav button,
+body.dark-theme .learn-login,
+html[data-theme="dark"] .learn-nav nav button,
+html[data-theme="dark"] .learn-login {
+  color: #e0e6f4;
+}
+
+body.dark-theme .learn-login,
+html[data-theme="dark"] .learn-login {
+  border-color: #3c4964;
+}
+
+body.dark-theme .learn-nav nav button:hover,
+body.dark-theme .learn-nav nav .active,
+html[data-theme="dark"] .learn-nav nav button:hover,
+html[data-theme="dark"] .learn-nav nav .active {
+  color: #b6a5ff;
+}
+
+body.dark-theme .learn-eyebrow,
+html[data-theme="dark"] .learn-eyebrow {
+  border: 1px solid #392e6c;
+  background: #211b42;
+  color: #b7a7ff;
+}
+
+body.dark-theme .learn-hero h1,
+body.dark-theme .learn-title h2,
+body.dark-theme .learn-step h3,
+body.dark-theme .learn-feature h3,
+body.dark-theme .ai-tech h2,
+body.dark-theme .stats-grid b,
+body.dark-theme .person b,
+html[data-theme="dark"] .learn-hero h1,
+html[data-theme="dark"] .learn-title h2,
+html[data-theme="dark"] .learn-step h3,
+html[data-theme="dark"] .learn-feature h3,
+html[data-theme="dark"] .ai-tech h2,
+html[data-theme="dark"] .stats-grid b,
+html[data-theme="dark"] .person b {
+  color: #f0f3ff;
+}
+
+body.dark-theme .learn-hero-copy > p,
+body.dark-theme .learn-hero li span,
+body.dark-theme .learn-step p,
+body.dark-theme .learn-feature p,
+body.dark-theme .ai-tech p,
+body.dark-theme .stats-grid small,
+body.dark-theme .testimonial-grid p,
+body.dark-theme .person small,
+html[data-theme="dark"] .learn-hero-copy > p,
+html[data-theme="dark"] .learn-hero li span,
+html[data-theme="dark"] .learn-step p,
+html[data-theme="dark"] .learn-feature p,
+html[data-theme="dark"] .ai-tech p,
+html[data-theme="dark"] .stats-grid small,
+html[data-theme="dark"] .testimonial-grid p,
+html[data-theme="dark"] .person small {
+  color: #a7b2c9;
+}
+
+body.dark-theme .learn-hero h1 span,
+body.dark-theme .learn-title span,
+body.dark-theme .learn-hero li,
+html[data-theme="dark"] .learn-hero h1 span,
+html[data-theme="dark"] .learn-title span,
+html[data-theme="dark"] .learn-hero li {
+  color: #a995ff;
+}
+
+body.dark-theme .art-orbit,
+html[data-theme="dark"] .art-orbit {
+  border-color: #36315e;
+}
+
+body.dark-theme .analysis-window,
+html[data-theme="dark"] .analysis-window {
+  border: 1px solid #2b3855;
+  background: #131d34;
+  color: #eef2ff;
+}
+
+body.dark-theme .score-ring,
+html[data-theme="dark"] .score-ring {
+  background:
+    radial-gradient(#131d34 57%, transparent 58%),
+    conic-gradient(#1dbf7a 92%, #294537 0);
+}
+
+body.dark-theme .analysis-main p,
+body.dark-theme .factor-row,
+body.dark-theme .news-preview b,
+html[data-theme="dark"] .analysis-main p,
+html[data-theme="dark"] .factor-row,
+html[data-theme="dark"] .news-preview b {
+  color: #a7b2c9;
+}
+
+body.dark-theme .news-preview,
+html[data-theme="dark"] .news-preview {
+  border: 1px solid #293754;
+  background: #1a2741;
+}
+
+body.dark-theme .news-image,
+html[data-theme="dark"] .news-image {
+  background: linear-gradient(135deg, #303d5c, #222e49);
+}
+
+body.dark-theme .learn-section.bordered,
+html[data-theme="dark"] .learn-section.bordered {
+  border-color: #26324c;
+  background: rgba(17, 26, 48, 0.56);
+}
+
+body.dark-theme .step-badge,
+html[data-theme="dark"] .step-badge {
+  background: #28224f;
+  color: #b2a1ff;
+}
+
+body.dark-theme .step-badge b,
+html[data-theme="dark"] .step-badge b {
+  border-color: #0a1020;
+}
+
+body.dark-theme .learn-feature,
+body.dark-theme .testimonial-grid article,
+html[data-theme="dark"] .learn-feature,
+html[data-theme="dark"] .testimonial-grid article {
+  border-color: #273552;
+  background: linear-gradient(145deg, #151f38, #111a30);
+  color: #eef2ff;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+}
+
+body.dark-theme .learn-page .feature-icon,
+html[data-theme="dark"] .learn-page .feature-icon {
+  background: #28224f;
+  color: #b2a1ff;
+}
+
+body.dark-theme .ai-tech,
+html[data-theme="dark"] .ai-tech {
+  border-color: #293653;
+  background: linear-gradient(110deg, #151d36, #111a30);
+}
+
+body.dark-theme .tech-tags span,
+html[data-theme="dark"] .tech-tags span {
+  background: #28224f;
+  color: #b2a1ff;
+}
+
+body.dark-theme .brain-base,
+html[data-theme="dark"] .brain-base {
+  background: #28224f;
+  border-color: #684ce3;
+}
+
+body.dark-theme .stats-grid > div,
+html[data-theme="dark"] .stats-grid > div {
+  border-right-color: #293653;
+}
+
+body.dark-theme .stats-grid i,
+html[data-theme="dark"] .stats-grid i {
+  background: #28224f;
+  color: #b2a1ff;
 }

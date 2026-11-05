@@ -1,6 +1,7 @@
 
 import Navbar from "../components/Landing/Navbar";
 import HeroSection from "../components/Landing/HeroSection";
+import PromoVideo from "../components/Landing/PromoVideo";
 import InfoSections from "../components/Landing/InfoSections";
 import Footer from "../components/Landing/Footer";
 
@@ -12,18 +13,10 @@ function LandingPage({
   openAbout,
   openLearnMore,
 }) {
-  // Landing page buttons should open Login first.
-  const goToLogin = () => {
-    if (openLogin) {
-      openLogin();
-    }
-  };
-
   return (
     <div className="page-enter landing-page">
 
       <Navbar
-        openDashboard={openDashboard}
         openLogin={openLogin}
         openSignup={openSignup}
         openFeatures={openFeatures}
@@ -31,15 +24,21 @@ function LandingPage({
         openLearnMore={openLearnMore}
       />
 
+      {/* MAIN HERO SECTION */}
       <HeroSection
-        openDashboard={goToLogin}
+        openDashboard={openDashboard}
         openLearnMore={openLearnMore}
       />
 
+      {/* PROMOTIONAL VIDEO SECTION */}
+      <PromoVideo />
+
+      {/* EXISTING INFORMATION SECTIONS */}
       <InfoSections
-        openDashboard={goToLogin}
+        openDashboard={openDashboard}
       />
 
+      {/* FOOTER */}
       <Footer />
 
     </div>

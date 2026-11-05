@@ -67,7 +67,29 @@ function App() {
   /* ================= NAVIGATION ================= */
 
   const openDashboard = () => {
+    const hasSession =
+      localStorage.getItem("fc_token") ||
+      localStorage.getItem("fc_guest_mode") === "true";
+
+    if (!hasSession) {
+      setPage("login");
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+      return;
+    }
+
     setPage("dashboard");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  const openLoginForDashboard = () => {
+    setPage("login");
 
     window.scrollTo({
       top: 0,
@@ -156,7 +178,7 @@ function App() {
 
             {page === "landing" && (
               <LandingPage
-                openDashboard={openDashboard}
+                openDashboard={openLoginForDashboard}
                 openLogin={openLogin}
                 openSignup={openSignup}
                 openFeatures={openFeatures}

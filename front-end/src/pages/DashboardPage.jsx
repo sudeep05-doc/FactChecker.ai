@@ -20,40 +20,6 @@ import {
    NOTIFICATION DATA
 ========================================================= */
 
-const initialNotifications = [
-  {
-    id: 1,
-    type: "warning",
-    title: "Sample notice — no claim was evaluated.",
-    description:
-      "This placeholder notification is not based on a real content analysis.",
-    time: "1h ago",
-    action: "Analyze Now",
-    unread: true,
-  },
-  {
-    id: 2,
-    type: "system",
-    title: "Evidence verification is not implemented.",
-    description:
-      "The prototype does not produce evidence-backed factual verdicts or confidence scores.",
-    time: "3h ago",
-    action: "Explore Features",
-    unread: true,
-  },
-  {
-    id: 3,
-    type: "mention",
-    title: "@Sarah mentioned you in a Saved Article comment.",
-    description:
-      '@Sarah: "Check this out, it seems related to your saved topic..."',
-    time: "3h ago",
-    action: "View Comment",
-    unread: true,
-  },
-];
-
-
 /* =========================================================
    NOTIFICATION PANEL
 ========================================================= */
@@ -1404,7 +1370,7 @@ const DashboardPage = ({
 
 
   const [notifications, setNotifications] =
-    useState(initialNotifications);
+    useState([]);
 
 
   /* =======================================================

@@ -1,5 +1,7 @@
-import { useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import "./Signup.css";
+import { AppContext } from "../../context/AppContext";
+import ThemeToggle from "../Common/ThemeToggle";
 
 function ShieldIcon({ className = "" }) {
   return (
@@ -71,6 +73,7 @@ function EyeIcon({ hidden = false }) {
 }
 
 function SignupPage({ onLogin, openDashboard, backHome }) {
+  const { setProfile } = useContext(AppContext);
   const [form, setForm] = useState({
     fullName: "",
     username: "",
@@ -204,6 +207,8 @@ return "";
       "fc_profile",
       JSON.stringify(data.data.profile)
     );
+    localStorage.removeItem("fc_guest_mode");
+    setProfile(data.data.profile);
 
     setLoading(false);
 
@@ -223,6 +228,7 @@ return "";
 
   return (
     <main className="signup-modern-page">
+      <ThemeToggle className="auth-theme-toggle" />
 
       {/* =====================================================
           LEFT VISUAL PANEL
@@ -264,7 +270,7 @@ return "";
           <div className="signup-visual-bottom">
 
             <span className="signup-eyebrow">
-              AI-POWERED FACT VERIFICATION
+              RESEARCH PROTOTYPE
             </span>
 
             <h1>
@@ -276,8 +282,9 @@ return "";
             </h1>
 
             <p>
-              Join FactChecker and use intelligent AI-powered
-              tools to analyze, verify and understand information.
+              Create a workspace to organize your profile and
+              submissions. Evidence-based factual verdicts are not
+              available in this prototype.
             </p>
 
             <div className="signup-trust-row">
@@ -345,8 +352,9 @@ return "";
             </h2>
 
             <p>
-              Create your FactChecker account and start
-              verifying information with confidence.
+              Create an account to manage your profile and saved
+              submissions. Evidence-based factual verification is
+              not available yet.
             </p>
 
           </div>

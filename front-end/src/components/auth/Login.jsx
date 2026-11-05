@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import AuthLayout from "./AuthLayout";
 
 export default function Login({ onSignup, onForgotPassword }) {

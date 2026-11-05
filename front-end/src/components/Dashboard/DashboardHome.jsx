@@ -1,4 +1,6 @@
-import React, { useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { AppContext } from "../../context/AppContext";
+import { getPredictionPresentation } from "../../utils/prediction";
 
 const verificationTypes = [
   {
@@ -71,34 +73,11 @@ const supportedFormats = [
   },
 ];
 
-const recentVerifications = [
-  {
-    id: 1,
-    title: "Document Analysis (TXT)",
-    time: "Just now",
-    result: "Likely Human",
-    type: "human",
-  },
-  {
-    id: 2,
-    title: "Image Check (PNG)",
-    time: "2 minutes ago",
-    result: "Potential AI",
-    type: "ai",
-  },
-  {
-    id: 3,
-    title: "Article URL Verification",
-    time: "8 minutes ago",
-    result: "Confirmed",
-    type: "confirmed",
-  },
-];
-
 export default function DashboardHome({
   onAnalyze,
   onViewHistory,
 }) {
+  const { history = [] } = useContext(AppContext);
   const [activeType, setActiveType] =
     useState("text");
 
@@ -119,6 +98,25 @@ export default function DashboardHome({
 
   const fileInputRef =
     useRef(null);
+
+  const cameraVideoRef = useRef(null);
+  const cameraRequestRef = useRef(0);
+  const [cameraStream, setCameraStream] = useState(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraLoading, setCameraLoading] = useState(false);
+  const [cameraError, setCameraError] = useState("");
+
+  useEffect(() => {
+    if (!cameraStream) return undefined;
+
+    if (cameraVideoRef.current) {
+      cameraVideoRef.current.srcObject = cameraStream;
+    }
+
+    return () => {
+      cameraStream.getTracks().forEach((track) => track.stop());
+    };
+  }, [cameraStream]);
 
   const handleTypeChange = (type) => {
     setActiveType(type);
@@ -169,6 +167,85 @@ export default function DashboardHome({
       event.dataTransfer.files?.[0];
 
     handleFile(file);
+  };
+
+  const closeCamera = () => {
+    cameraRequestRef.current += 1;
+    setCameraStream(null);
+    setCameraOpen(false);
+    setCameraLoading(false);
+    setCameraError("");
+  };
+
+  const openCamera = async (event) => {
+    event.stopPropagation();
+    setCameraOpen(true);
+    setCameraLoading(true);
+    setCameraError("");
+
+    const requestId = cameraRequestRef.current + 1;
+    cameraRequestRef.current = requestId;
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraLoading(false);
+      setCameraError(
+        "Camera access is not available in this browser. Use HTTPS or localhost, or upload an image instead."
+      );
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+        audio: false,
+      });
+
+      if (cameraRequestRef.current !== requestId) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+
+      setCameraStream(stream);
+      setCameraLoading(false);
+    } catch (error) {
+      if (cameraRequestRef.current !== requestId) return;
+
+      setCameraLoading(false);
+      setCameraError(
+        error.name === "NotAllowedError" || error.name === "PermissionDeniedError"
+          ? "Camera permission was denied. Allow camera access in your browser settings, then try again."
+          : error.name === "NotFoundError"
+          ? "No camera was found on this device. You can upload an image instead."
+          : `Unable to open the camera: ${error.message || "Please try again."}`
+      );
+    }
+  };
+
+  const captureCameraImage = () => {
+    const video = cameraVideoRef.current;
+    if (!video?.videoWidth || !video?.videoHeight) {
+      setCameraError("The camera is not ready yet. Please wait and try again.");
+      return;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d")?.drawImage(video, 0, 0);
+
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        setCameraError("Unable to capture an image. Please try again.");
+        return;
+      }
+
+      handleFile(
+        new File([blob], `camera-capture-${Date.now()}.jpg`, {
+          type: "image/jpeg",
+        })
+      );
+      closeCamera();
+    }, "image/jpeg", 0.92);
   };
 
   const handleAnalyze = async () => {
@@ -429,6 +506,22 @@ export default function DashboardHome({
               </>
             )}
 
+            {activeType === "image" && (
+              <button
+                type="button"
+                className="camera-upload-button"
+                aria-label="Take or upload a photo with your camera"
+                title="Take or upload a photo with your camera"
+                onClick={openCamera}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 7.5h3l1.5-2h7l1.5 2h3A1.5 1.5 0 0 1 21.5 9v9a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 18V9A1.5 1.5 0 0 1 4 7.5Z" />
+                  <circle cx="12" cy="13" r="3.5" />
+                </svg>
+                <span>Camera</span>
+              </button>
+            )}
+
           </div>
         )}
 
@@ -558,9 +651,7 @@ export default function DashboardHome({
                 Recent Verifications
               </h2>
 
-              <p>
-                Your latest AI checks
-              </p>
+              <p>Your latest submissions</p>
             </div>
 
             <button
@@ -573,8 +664,17 @@ export default function DashboardHome({
 
           <div className="recent-verification-list">
 
-            {recentVerifications.map(
-              (item) => (
+            {history.slice(0, 3).map(
+              (item) => {
+                const presentation = getPredictionPresentation(item);
+                const inputType = item.contentType || "Content";
+                const title = `${inputType.charAt(0).toUpperCase()}${inputType.slice(1)} submission`;
+                const hasVerdict = [
+                  "evidence_verdict",
+                  "dataset_classification",
+                ].includes(presentation.kind);
+
+                return (
                 <div
                   key={item.id}
                   className="recent-verification"
@@ -582,22 +682,29 @@ export default function DashboardHome({
 
                   <div>
                     <strong>
-                      {item.title}
+                      {title}
                     </strong>
 
                     <span>
-                      {item.time}
+                      {item.time || "Saved"}
                     </span>
                   </div>
 
                   <span
-                    className={`verification-result ${item.type}`}
+                    className={`verification-result ${hasVerdict ? "available" : "unavailable"}`}
                   >
-                    {item.result}
+                    {hasVerdict ? presentation.summary : "No verdict generated"}
                   </span>
 
                 </div>
-              )
+                );
+              }
+            )}
+
+            {history.length === 0 && (
+              <p className="recent-verification-empty">
+                No submissions yet. Start an analysis to see it here.
+              </p>
             )}
 
           </div>
@@ -664,6 +771,68 @@ export default function DashboardHome({
         </div>
 
       </section>
+
+      {cameraOpen && (
+        <div
+          className="camera-capture-overlay"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeCamera();
+          }}
+        >
+          <section
+            className="camera-capture-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="camera-dialog-title"
+          >
+            <header>
+              <h2 id="camera-dialog-title">Capture an image</h2>
+              <button
+                type="button"
+                aria-label="Close camera"
+                onClick={closeCamera}
+              >
+                ×
+              </button>
+            </header>
+
+            {cameraStream ? (
+              <video
+                ref={cameraVideoRef}
+                className="camera-preview"
+                autoPlay
+                playsInline
+                muted
+              />
+            ) : (
+              <div className="camera-preview camera-preview-message" role="status">
+                {cameraLoading
+                  ? "Requesting camera permission…"
+                  : cameraError || "Camera is unavailable."}
+              </div>
+            )}
+
+            {cameraError && cameraStream && (
+              <p className="camera-error" role="alert">{cameraError}</p>
+            )}
+
+            <footer>
+              <button type="button" className="camera-cancel-button" onClick={closeCamera}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="camera-capture-button"
+                onClick={captureCameraImage}
+                disabled={!cameraStream}
+              >
+                Capture photo
+              </button>
+            </footer>
+          </section>
+        </div>
+      )}
 
     </div>
   );

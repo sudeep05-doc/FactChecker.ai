@@ -1,4 +1,5 @@
 import "../styles/FeatureAbout.css";
+import ThemeToggle from "../components/Common/ThemeToggle";
 
 function FeaturesPage({
   openDashboard,
@@ -66,6 +67,8 @@ function FeaturesPage({
         </button>
 
         <div className="inner-actions">
+
+          <ThemeToggle className="inner-theme-toggle" />
 
           <button
             type="button"

@@ -1,4 +1,5 @@
 import "../styles/LearnMore.css";
+import ThemeToggle from "../components/Common/ThemeToggle";
 
 function LearnMorePage({
   openDashboard,
@@ -145,9 +146,7 @@ function LearnMorePage({
 
         <div className="learn-actions">
 
-          <button className="learn-theme">
-            ◐
-          </button>
+          <ThemeToggle className="learn-theme" />
 
           <button
             className="learn-login"

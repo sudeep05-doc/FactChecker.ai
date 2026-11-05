@@ -1169,7 +1169,7 @@
     min-height: 72px;
   }
 
-  .inner-actions button:first-child {
+  .inner-actions button:not(.inner-theme-toggle):not(.inner-signup) {
     display: none;
   }
 
@@ -1206,6 +1206,153 @@
 
   .feature-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+body.dark-theme .feature-page,
+body.dark-theme .about-page,
+html[data-theme="dark"] .feature-page,
+html[data-theme="dark"] .about-page {
+  background:
+    radial-gradient(circle at 75% 15%, rgba(101, 72, 255, 0.12), transparent 30%),
+    #0a1020;
+  color: #eef2ff;
+}
+
+body.dark-theme .inner-page-nav,
+html[data-theme="dark"] .inner-page-nav {
+  border-bottom-color: #26324c;
+}
+
+body.dark-theme .inner-logo,
+html[data-theme="dark"] .inner-logo {
+  color: #eef2ff;
+}
+
+body.dark-theme .inner-logo em,
+html[data-theme="dark"] .inner-logo em {
+  color: #a28cff;
+}
+
+body.dark-theme .inner-actions button:not(.inner-signup):not(.site-theme-toggle),
+html[data-theme="dark"] .inner-actions button:not(.inner-signup):not(.site-theme-toggle) {
+  color: #e0e6f4;
+}
+
+body.dark-theme .inner-actions button:not(.inner-signup):not(.site-theme-toggle):hover,
+html[data-theme="dark"] .inner-actions button:not(.inner-signup):not(.site-theme-toggle):hover {
+  color: #b6a5ff;
+}
+
+body.dark-theme .page-badge,
+html[data-theme="dark"] .page-badge {
+  border: 1px solid #392e6c;
+  background: #211b42;
+  color: #b7a7ff;
+}
+
+body.dark-theme .inner-hero h1,
+body.dark-theme .about-hero h1,
+body.dark-theme .about-story-text h2,
+body.dark-theme .about-values h2,
+body.dark-theme .feature-card h2,
+body.dark-theme .value-card h3,
+html[data-theme="dark"] .inner-hero h1,
+html[data-theme="dark"] .about-hero h1,
+html[data-theme="dark"] .about-story-text h2,
+html[data-theme="dark"] .about-values h2,
+html[data-theme="dark"] .feature-card h2,
+html[data-theme="dark"] .value-card h3 {
+  color: #f0f3ff;
+}
+
+body.dark-theme .inner-hero p,
+body.dark-theme .about-hero p,
+body.dark-theme .feature-card p,
+body.dark-theme .about-story-text p,
+body.dark-theme .value-card p,
+html[data-theme="dark"] .inner-hero p,
+html[data-theme="dark"] .about-hero p,
+html[data-theme="dark"] .feature-card p,
+html[data-theme="dark"] .about-story-text p,
+html[data-theme="dark"] .value-card p {
+  color: #a7b2c9;
+}
+
+body.dark-theme .feature-card,
+body.dark-theme .value-card,
+html[data-theme="dark"] .feature-card,
+html[data-theme="dark"] .value-card {
+  border-color: #273552;
+  background: linear-gradient(145deg, #151f38, #111a30);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-theme .feature-card:hover,
+body.dark-theme .value-card:hover,
+html[data-theme="dark"] .feature-card:hover,
+html[data-theme="dark"] .value-card:hover {
+  border-color: #594ba0;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.32);
+}
+
+body.dark-theme .feature-number,
+html[data-theme="dark"] .feature-number {
+  color: #8290ad;
+}
+
+body.dark-theme .feature-icon,
+html[data-theme="dark"] .feature-icon {
+  background: #28224f;
+  color: #b2a1ff;
+}
+
+body.dark-theme .feature-card:hover .feature-icon,
+html[data-theme="dark"] .feature-card:hover .feature-icon {
+  background: #332b63;
+}
+
+body.dark-theme .section-label,
+body.dark-theme .value-card > span,
+html[data-theme="dark"] .section-label,
+html[data-theme="dark"] .value-card > span {
+  color: #aa96ff;
+}
+
+body.dark-theme .verification-card,
+html[data-theme="dark"] .verification-card {
+  border: 1px solid #2b3855;
+  background: #131d34;
+}
+
+body.dark-theme .verification-content,
+html[data-theme="dark"] .verification-content {
+  background: #1b2842;
+}
+
+body.dark-theme .verification-content h3,
+html[data-theme="dark"] .verification-content h3 {
+  color: #f0f3ff;
+}
+
+body.dark-theme .verification-line,
+html[data-theme="dark"] .verification-line {
+  background: #2a3851;
+}
+
+body.dark-theme .verification-result span,
+html[data-theme="dark"] .verification-result span {
+  color: #a7b2c9;
+}
+
+body.dark-theme .inner-bottom-nav button,
+html[data-theme="dark"] .inner-bottom-nav button {
+  color: #ad9aff;
+}
+
+@media (max-width: 560px) {
+  .inner-actions button:not(.inner-theme-toggle):not(.inner-signup) {
+    display: none;
   }
 
   .feature-cta,

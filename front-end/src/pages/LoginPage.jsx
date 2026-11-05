@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import "./AuthModern.css";
+import { AppContext } from "../context/AppContext";
+import ThemeToggle from "../components/Common/ThemeToggle";
 
 function FactCheckerLogo({ className = "" }) {
   return (
@@ -23,6 +25,7 @@ function LoginPage({
   openDashboard,
   openSignup,
 }) {
+  const { setProfile } = useContext(AppContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -90,6 +93,7 @@ function LoginPage({
     );
 
     localStorage.removeItem("fc_guest_mode");
+    setProfile(data.data.profile);
 
     console.log(
       "Login successful:",
@@ -139,6 +143,7 @@ function LoginPage({
       "fc_profile",
       JSON.stringify(guestProfile)
     );
+    setProfile(guestProfile);
 
     // Open dashboard.
     if (openDashboard) {
@@ -417,6 +422,7 @@ const handleBackToLogin = () => {
 
   return (
     <main className="modern-auth-page">
+      <ThemeToggle className="auth-theme-toggle" />
 
       {/* =====================================================
           LEFT VISUAL SECTION
@@ -458,7 +464,7 @@ const handleBackToLogin = () => {
           <div className="auth-visual-text">
 
             <span className="auth-eyebrow">
-              AI-POWERED FACT VERIFICATION
+              RESEARCH PROTOTYPE
             </span>
 
             <h1>
@@ -470,9 +476,9 @@ const handleBackToLogin = () => {
             </h1>
 
             <p>
-              Verify claims, detect misleading
-              information, and discover trustworthy
-              facts with intelligent AI-powered analysis.
+              Explore claims and organize submissions in one
+              workspace. Evidence-based factual verdicts are
+              not available in this prototype.
             </p>
 
 
@@ -1011,8 +1017,8 @@ const handleBackToLogin = () => {
         </h2>
 
         <p>
-          Sign in to FactChecker and verify
-          information with confidence.
+          Sign in to manage your profile and saved submissions.
+          Evidence-based factual verification is not available yet.
         </p>
 
       </div>
@@ -1333,7 +1339,7 @@ const handleBackToLogin = () => {
         </svg>
 
         <span>
-          Your information is protected and secure
+          Your profile and saved submissions are available in your workspace
         </span>
 
       </div>

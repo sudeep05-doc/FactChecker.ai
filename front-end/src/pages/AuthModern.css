@@ -1595,3 +1595,113 @@ input {
   font-size: 13px;
   line-height: 1.5;
 }
+
+/* Dark theme */
+body.dark-theme .modern-auth-page {
+  color-scheme: dark;
+  background: #080e1c;
+}
+
+body.dark-theme .modern-auth-form-area {
+  background:
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(91, 67, 220, 0.12),
+      transparent 38%
+    ),
+    linear-gradient(145deg, #0d1526, #080e1c 72%);
+}
+
+body.dark-theme .modern-brand-name {
+  background: none;
+  background-clip: border-box;
+  -webkit-background-clip: border-box;
+  color: #f0f4ff;
+  -webkit-text-fill-color: #f0f4ff;
+}
+
+body.dark-theme .modern-auth-heading h2 {
+  color: #f0f4ff;
+}
+
+body.dark-theme .modern-auth-heading p,
+body.dark-theme .modern-switch-auth {
+  color: #a4afc4;
+}
+
+body.dark-theme .modern-auth-heading .auth-welcome-badge {
+  border-color: rgba(162, 140, 255, 0.25);
+  background: rgba(113, 84, 220, 0.14);
+  color: #b6a5ff;
+}
+
+body.dark-theme .modern-form-group label {
+  color: #d7deec;
+}
+
+body.dark-theme .modern-input-wrapper {
+  border-color: #34415b;
+  background: #111b2e;
+}
+
+body.dark-theme .modern-input-wrapper:focus-within {
+  border-color: #8873f4;
+  box-shadow: 0 0 0 4px rgba(136, 115, 244, 0.14);
+}
+
+body.dark-theme .modern-input-wrapper input {
+  color: #f0f4ff;
+}
+
+body.dark-theme .modern-password-toggle {
+  color: #a4afc4;
+}
+
+body.dark-theme .modern-password-toggle:hover,
+body.dark-theme .modern-guest-button:hover {
+  background: #202b42;
+  color: #f0f4ff;
+}
+
+body.dark-theme .modern-divider span {
+  background: #2a354b;
+}
+
+body.dark-theme .modern-google-button {
+  border-color: #34415b;
+  background: #111b2e;
+  color: #e3e9f5;
+}
+
+body.dark-theme .modern-google-button:hover {
+  border-color: #596988;
+  background: #17233a;
+}
+
+body.dark-theme .modern-guest-button {
+  background: #172238;
+  color: #c1cbdd;
+}
+
+body.dark-theme .modern-switch-auth button,
+body.dark-theme .modern-forgot {
+  color: #a995ff;
+}
+
+body.dark-theme .modern-forgot:hover {
+  color: #c0b3ff;
+}
+
+body.dark-theme .auth-security-note {
+  color: #8794ab;
+}
+
+body.dark-theme .auth-security-note svg {
+  color: #9aa8c0;
+}
+
+body.dark-theme .modern-success-message {
+  border-color: rgba(52, 211, 153, 0.25);
+  background: rgba(16, 185, 129, 0.12);
+  color: #6ee7b7;
+}

@@ -1155,3 +1155,107 @@
     margin-bottom: 22px;
   }
 }
+
+/* Dark theme */
+body.dark-theme .signup-modern-page {
+  color-scheme: dark;
+  background: #080e1c;
+}
+
+body.dark-theme .signup-form-area {
+  background:
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(91, 67, 220, 0.12),
+      transparent 38%
+    ),
+    linear-gradient(145deg, #0d1526, #080e1c 72%);
+}
+
+body.dark-theme .signup-brand > span {
+  background: none;
+  background-clip: border-box;
+  -webkit-background-clip: border-box;
+  color: #f0f4ff;
+  -webkit-text-fill-color: #f0f4ff;
+}
+
+body.dark-theme .signup-heading h2 {
+  color: #f0f4ff;
+}
+
+body.dark-theme .signup-heading p,
+body.dark-theme .signup-terms,
+body.dark-theme .signup-login-switch {
+  color: #a4afc4;
+}
+
+body.dark-theme .signup-heading-badge {
+  border-color: rgba(162, 140, 255, 0.25);
+  background: rgba(113, 84, 220, 0.14);
+  color: #b6a5ff;
+}
+
+body.dark-theme .signup-field label {
+  color: #d7deec;
+}
+
+body.dark-theme .signup-input {
+  border-color: #34415b;
+  background: #111b2e;
+}
+
+body.dark-theme .signup-input:focus-within {
+  border-color: #8873f4;
+  box-shadow: 0 0 0 4px rgba(136, 115, 244, 0.14);
+}
+
+body.dark-theme .signup-input input {
+  color: #f0f4ff;
+}
+
+body.dark-theme .signup-input-prefix,
+body.dark-theme .signup-terms button,
+body.dark-theme .signup-login-switch button {
+  color: #a995ff;
+}
+
+body.dark-theme .signup-eye {
+  color: #a4afc4;
+}
+
+body.dark-theme .signup-eye:hover {
+  background: #202b42;
+  color: #f0f4ff;
+}
+
+body.dark-theme .signup-strength-bars span {
+  background: #34415b;
+}
+
+body.dark-theme .signup-custom-check {
+  border-color: #596780;
+}
+
+body.dark-theme .signup-divider span {
+  background: #2a354b;
+}
+
+body.dark-theme .signup-social-button {
+  border-color: #34415b;
+  background: #111b2e;
+  color: #e3e9f5;
+}
+
+body.dark-theme .signup-social-button:hover {
+  border-color: #596988;
+  background: #17233a;
+}
+
+body.dark-theme .apple-symbol {
+  color: #f0f4ff;
+}
+
+body.dark-theme .signup-security {
+  color: #8794ab;
+}

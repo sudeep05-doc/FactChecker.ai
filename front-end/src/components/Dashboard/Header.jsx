@@ -5,7 +5,6 @@ import { AppContext } from "../../context/AppContext";
 const Header = ({
   activeView,
   setActiveView,
-  backHome,
 }) => {
 
   const {
@@ -203,10 +202,6 @@ const Header = ({
             🔔
           </span>
 
-
-          <span className="notification-badge">
-            3
-          </span>
 
         </button>
 
