@@ -1488,6 +1488,26 @@ html[data-theme="dark"] .overview-panel {
   font-size: 10px;
 }
 
+.activity-chart-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.activity-range-select {
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid var(--overview-border);
+  border-radius: 7px;
+  background: var(--overview-card);
+  color: var(--overview-text);
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
 .chart-legend {
   justify-content: flex-end;
   flex-wrap: wrap;
@@ -1797,6 +1817,10 @@ html[data-theme="dark"] .status-unavailable { color: #ff91a5; }
 
   .overview-panel-header {
     align-items: flex-start;
+  }
+
+  .activity-chart-controls {
+    justify-content: flex-start;
   }
 
   .trend-panel {

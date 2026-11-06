@@ -1,4 +1,4 @@
-import { useContext, useMemo } from "react";
+import { useContext, useMemo, useState } from "react";
 import { AppContext } from "../../context/AppContext";
 import "./DashboardOverview.css";
 
@@ -107,6 +107,7 @@ const makeAreaPath = (values, maxValue) => {
 
 function DashboardOverview({ setActiveView }) {
   const { history = [] } = useContext(AppContext);
+  const [activityRange, setActivityRange] = useState("7days");
 
   const dashboardData = useMemo(() => {
     const records = Array.isArray(history) ? history : [];
@@ -116,11 +117,25 @@ function DashboardOverview({ setActiveView }) {
     }));
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const days = Array.from({ length: 7 }, (_, index) => {
-      const date = new Date(today.getTime() - (6 - index) * DAY_MS);
+    const bucketCount = activityRange === "1year"
+      ? 12
+      : activityRange === "1month"
+        ? 5
+        : 7;
+    const activityStart = activityRange === "1year"
+      ? new Date(today.getFullYear(), today.getMonth() - 11, 1)
+      : new Date(today.getTime() - (activityRange === "1month" ? 29 : 6) * DAY_MS);
+    const activity = Array.from({ length: bucketCount }, (_, index) => {
+      const date = activityRange === "1year"
+        ? new Date(activityStart.getFullYear(), activityStart.getMonth() + index, 1)
+        : new Date(activityStart.getTime() + index * (activityRange === "1month" ? 7 : 1) * DAY_MS);
       return {
         date,
-        label: date.toLocaleDateString(undefined, { weekday: "short" }),
+        label: activityRange === "7days"
+          ? date.toLocaleDateString(undefined, { weekday: "short" })
+          : date.toLocaleDateString(undefined, activityRange === "1year"
+            ? { month: "short" }
+            : { month: "short", day: "numeric" }),
         total: 0,
         dataset: 0,
       };
@@ -130,13 +145,18 @@ function DashboardOverview({ setActiveView }) {
       if (!date) return;
       const dayIndex = Math.floor(
         (new Date(date.getFullYear(), date.getMonth(), date.getDate()) -
-          days[0].date) /
-          DAY_MS
+          activityStart) / DAY_MS
       );
-      if (dayIndex < 0 || dayIndex >= days.length) return;
-      days[dayIndex].total += 1;
+      const bucketIndex = activityRange === "1year"
+        ? (date.getFullYear() - activityStart.getFullYear()) * 12 +
+          date.getMonth() - activityStart.getMonth()
+        : activityRange === "1month"
+          ? Math.floor(dayIndex / 7)
+          : dayIndex;
+      if (bucketIndex < 0 || bucketIndex >= activity.length || date > now) return;
+      activity[bucketIndex].total += 1;
       if (getRecordCategory(record) === "dataset") {
-        days[dayIndex].dataset += 1;
+        activity[bucketIndex].dataset += 1;
       }
     });
 
@@ -161,18 +181,18 @@ function DashboardOverview({ setActiveView }) {
 
     return {
       records,
-      days,
+      activity,
       datasetCount,
       evidenceCount,
       unavailableCount,
       contentTypes,
       recent,
     };
-  }, [history]);
+  }, [history, activityRange]);
 
-  const { records, days, datasetCount, evidenceCount, unavailableCount, contentTypes, recent } =
+  const { records, activity, datasetCount, evidenceCount, unavailableCount, contentTypes, recent } =
     dashboardData;
-  const maxActivity = Math.max(1, ...days.map((day) => day.total));
+  const maxActivity = Math.max(1, ...activity.map((bucket) => bucket.total));
   const activityScale = Math.ceil(maxActivity / 4) * 4 || 1;
   const datasetShare = records.length
     ? (datasetCount / records.length) * 100
@@ -245,11 +265,27 @@ function DashboardOverview({ setActiveView }) {
           <div className="overview-panel-header">
             <div>
               <h2>Analysis activity</h2>
-              <small>Saved records by day · last 7 days</small>
+              <small>
+                Saved records {activityRange === "1year" ? "by month" : activityRange === "1month" ? "by week" : "by day"}
+                {" · "}
+                {activityRange === "1year" ? "last year" : activityRange === "1month" ? "last month" : "last 7 days"}
+              </small>
             </div>
-            <div className="chart-legend">
-              <span><i className="legend-records" /> Records</span>
-              <span><i className="legend-dataset" /> Dataset labels</span>
+            <div className="activity-chart-controls">
+              <select
+                aria-label="Analysis activity date range"
+                className="activity-range-select"
+                value={activityRange}
+                onChange={(event) => setActivityRange(event.target.value)}
+              >
+                <option value="7days">Last 7 days</option>
+                <option value="1month">Last 1 month</option>
+                <option value="1year">Last 1 year</option>
+              </select>
+              <div className="chart-legend">
+                <span><i className="legend-records" /> Records</span>
+                <span><i className="legend-dataset" /> Dataset labels</span>
+              </div>
             </div>
           </div>
           <div className="credibility-chart activity-chart">
@@ -257,7 +293,7 @@ function DashboardOverview({ setActiveView }) {
               viewBox="0 0 560 205"
               preserveAspectRatio="none"
               role="img"
-              aria-label="Saved analysis records and dataset-label outputs by day for the last seven days"
+              aria-label={`Saved analysis records and dataset-label outputs for the ${activityRange === "1year" ? "last year" : activityRange === "1month" ? "last month" : "last seven days"}`}
             >
               {[0, 1, 2, 3, 4].map((step) => {
                 const value = Math.ceil(activityScale * (4 - step) / 4);
@@ -269,29 +305,29 @@ function DashboardOverview({ setActiveView }) {
                   </g>
                 );
               })}
-              {days.map((day, index) => {
-                const x = 50 + (index * 500) / 6;
+              {activity.map((bucket, index) => {
+                const x = 50 + (index * 500) / Math.max(activity.length - 1, 1);
                 return (
-                  <g key={day.date.toISOString()}>
+                  <g key={bucket.date.toISOString()}>
                     <line x1={x} x2={x} y1="30" y2="172" className="chart-vertical-line" />
-                    <text x={x} y="198" textAnchor="middle" className="chart-axis">{day.label}</text>
+                    <text x={x} y="198" textAnchor="middle" className="chart-axis">{bucket.label}</text>
                   </g>
                 );
               })}
-              <path d={makeAreaPath(days.map((day) => day.total), activityScale)} className="chart-area-records" />
-              <path d={makeLinePath(days.map((day) => day.total), activityScale)} className="chart-line-records" />
-              <path d={makeLinePath(days.map((day) => day.dataset), activityScale)} className="chart-line-dataset" />
-              {days.map((day, index) => {
-                const x = 50 + (index * 500) / 6;
-                const yRecords = 172 - (day.total / activityScale) * 142;
-                const yDataset = 172 - (day.dataset / activityScale) * 142;
+              <path d={makeAreaPath(activity.map((bucket) => bucket.total), activityScale)} className="chart-area-records" />
+              <path d={makeLinePath(activity.map((bucket) => bucket.total), activityScale)} className="chart-line-records" />
+              <path d={makeLinePath(activity.map((bucket) => bucket.dataset), activityScale)} className="chart-line-dataset" />
+              {activity.map((bucket, index) => {
+                const x = 50 + (index * 500) / Math.max(activity.length - 1, 1);
+                const yRecords = 172 - (bucket.total / activityScale) * 142;
+                const yDataset = 172 - (bucket.dataset / activityScale) * 142;
                 return (
-                  <g key={`points-${day.date.toISOString()}`}>
+                  <g key={`points-${bucket.date.toISOString()}`}>
                     <circle cx={x} cy={yRecords} r="3.5" className="chart-dot-records">
-                      <title>{`${day.label}: ${day.total} saved records`}</title>
+                      <title>{`${bucket.label}: ${bucket.total} saved records`}</title>
                     </circle>
                     <circle cx={x} cy={yDataset} r="3.5" className="chart-dot-dataset">
-                      <title>{`${day.label}: ${day.dataset} dataset-label outputs`}</title>
+                      <title>{`${bucket.label}: ${bucket.dataset} dataset-label outputs`}</title>
                     </circle>
                   </g>
                 );
